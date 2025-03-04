@@ -11,47 +11,103 @@ export const IconSchema = z.object({
   }).optional()
 })
 
+// 定义视觉元素类型
+export const VisualElementSchema = z.object({
+  type: z.enum(["icon", "illustration", "image", "chart"]),
+  source: z.string(),
+  alt: z.string().optional(),
+  position: z.enum(["top", "left", "right", "bottom", "background"]).optional().default("left"),
+  style: z.object({
+    width: z.string().optional(),
+    height: z.string().optional(),
+    borderRadius: z.string().optional(),
+    opacity: z.number().optional(),
+  }).optional()
+})
+
 // 定义单个条目的内容
 export const CardItemSchema = z.object({
   id: z.number(),
   title: z.string(),
   description: z.string(), // 主要描述文本
-  actionStep: z.string(), // 行动步骤，这个图里每个项目都有
+  actionStep: z.string().optional(), // 行动步骤，可选
   icon: IconSchema.optional(),
-  visualElement: z.object({
-    type: z.enum(["icon", "illustration"]),
-    source: z.string(),
-    alt: z.string().optional()
+  visualElement: VisualElementSchema.optional(),
+  highlight: z.boolean().optional().default(false), // 是否高亮显示
+  style: z.object({
+    backgroundColor: z.string().optional(),
+    borderColor: z.string().optional(),
+    textColor: z.string().optional(),
+    padding: z.string().optional(),
+    borderRadius: z.string().optional(),
+    shadow: z.enum(["none", "sm", "md", "lg"]).optional(),
+  }).optional(),
+  tags: z.array(z.string()).optional(), // 标签列表
+  link: z.object({
+    url: z.string(),
+    text: z.string().optional(),
+    isExternal: z.boolean().optional().default(false)
+  }).optional() // 可选链接
+})
+
+// 定义布局类型
+export const LayoutSchema = z.object({
+  type: z.enum([
+    "grid",
+    "list",
+    "masonry",
+    "carousel",
+    "timeline",
+    "tabs",
+    "accordion"
+  ]).default("grid"),
+  columns: z.number().min(1).max(6).default(2),
+  spacing: z.number().optional(),
+  alignment: z.enum(["start", "center", "end"]).optional().default("start"),
+  itemStyle: z.object({
+    borderRadius: z.string().optional(),
+    padding: z.string().optional(),
+    shadow: z.enum(["none", "sm", "md", "lg"]).optional(),
+    numberStyle: z.object({
+      show: z.boolean().default(true),
+      position: z.enum(["top-left", "top-right", "center-left"]).optional().default("center-left"),
+      color: z.string().optional(),
+      size: z.number().optional(),
+      shape: z.enum(["circle", "square", "pill"]).optional().default("circle")
+    }).optional()
   }).optional()
+})
+
+// 定义主题类型
+export const ThemeSchema = z.object({
+  primaryColor: z.string().default("#FF9966"), // 用于数字标记的颜色
+  backgroundColor: z.string().default("#FFFFFF"),
+  textColor: z.string().default("#000000"),
+  accentColor: z.string().optional(), // 用于强调色
+  fontFamily: z.string().optional(),
+  borderRadius: z.string().optional().default("0.5rem"),
+  cardStyle: z.enum(["flat", "outlined", "elevated", "glass"]).optional().default("elevated"),
+  colorScheme: z.enum(["light", "dark", "auto"]).optional().default("light"),
+  animation: z.enum(["none", "fade", "slide", "zoom"]).optional().default("none")
 })
 
 // 定义整个卡片的数据结构
 export const CardSchema = z.object({
-  title: z.string(), // 主标题，如 "9 WAYS TO BUILD SELF-DISCIPLINE"
-  layout: z.object({
-    type: z.enum(["grid", "list"]).default("grid"),
-    columns: z.number().min(1).max(4).default(2),
-    spacing: z.number().optional(),
-    itemStyle: z.object({
-      borderRadius: z.number().optional(),
-      padding: z.number().optional(),
-      shadow: z.enum(["none", "sm", "md", "lg"]).optional(),
-      numberStyle: z.object({
-        show: z.boolean().default(true),
-        color: z.string().optional(),
-        size: z.number().optional()
-      }).optional()
-    }).optional()
-  }).optional(),
-  theme: z.object({
-    primaryColor: z.string().default("#FF9966"), // 用于数字标记的颜色
-    backgroundColor: z.string().default("#FFFFFF"),
-    textColor: z.string().default("#000000"),
-    accentColor: z.string().optional() // 用于强调色
-  }).optional(),
-  items: z.array(CardItemSchema)
+  title: z.string(), // 主标题
+  subtitle: z.string().optional(), // 副标题
+  description: z.string().optional(), // 卡片整体描述
+  layout: LayoutSchema.optional(),
+  theme: ThemeSchema.optional(),
+  items: z.array(CardItemSchema),
+  footer: z.object({
+    text: z.string().optional(),
+    showAttribution: z.boolean().optional().default(false)
+  }).optional()
 })
 
 export type Icon = z.infer<typeof IconSchema>
+export type VisualElement = z.infer<typeof VisualElementSchema>
 export type CardItem = z.infer<typeof CardItemSchema>
-export type Card = z.infer<typeof CardSchema> 
+export type Layout = z.infer<typeof LayoutSchema>
+export type Theme = z.infer<typeof ThemeSchema>
+export type Card = z.infer<typeof CardSchema>
