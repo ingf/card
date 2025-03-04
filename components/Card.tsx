@@ -1,5 +1,6 @@
 import { Card as CardType, CardItem as CardItemType, Theme, Layout } from '@/lib/schemas/card'
 import { cn } from '@/lib/utils'
+import { useState, useCallback, useEffect } from 'react'
 
 interface CardProps {
   data: CardType
@@ -204,6 +205,36 @@ const CardItem = ({ item, theme, layout }: {
   );
 };
 
+// 轮播导航按钮组件
+const CarouselNavButton = ({
+  direction,
+  onClick,
+  color
+}: {
+  direction: 'prev' | 'next',
+  onClick: () => void,
+  color: string
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      className="absolute top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md z-10 hover:bg-gray-50 transition-all"
+      style={{ [direction === 'prev' ? 'left' : 'right']: '8px' }}
+      aria-label={direction === 'prev' ? '上一个' : '下一个'}
+    >
+      {direction === 'prev' ? (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 19L8 12L15 5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ) : (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 5L16 12L9 19" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+    </button>
+  );
+};
+
 export function Card({ data }: CardProps) {
   const {
     title,
@@ -235,6 +266,51 @@ export function Card({ data }: CardProps) {
     ...defaultTheme,
     ...(themeInput || {})
   };
+
+  // 轮播状态
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const totalSlides = items.length;
+
+  // 轮播导航函数
+  const goToSlide = useCallback((index: number) => {
+    if (isAnimating) return;
+
+    setIsAnimating(true);
+    setActiveSlide(index);
+
+    // 找到对应的元素并滚动到视图
+    const slideElement = document.getElementById(`carousel-slide-${index}`);
+    if (slideElement) {
+      slideElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    }
+
+    // 动画完成后重置状态
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 500);
+  }, [isAnimating]);
+
+  const goToNextSlide = useCallback(() => {
+    const nextSlide = (activeSlide + 1) % totalSlides;
+    goToSlide(nextSlide);
+  }, [activeSlide, totalSlides, goToSlide]);
+
+  const goToPrevSlide = useCallback(() => {
+    const prevSlide = (activeSlide - 1 + totalSlides) % totalSlides;
+    goToSlide(prevSlide);
+  }, [activeSlide, totalSlides, goToSlide]);
+
+  // 自动轮播
+  useEffect(() => {
+    if (layout.type === 'carousel' && totalSlides > 1) {
+      const interval = setInterval(() => {
+        goToNextSlide();
+      }, 5000); // 5秒切换一次
+
+      return () => clearInterval(interval);
+    }
+  }, [layout.type, totalSlides, goToNextSlide]);
 
   // 动画类
   const animationClasses = {
@@ -392,27 +468,58 @@ export function Card({ data }: CardProps) {
           ))}
         </div>
       ) : layout.type === 'carousel' ? (
-        <div className="relative overflow-hidden">
-          <div className="flex overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 scrollbar-hide">
-            {items.map((item) => (
+        <div className="relative overflow-hidden rounded-lg carousel-container">
+          {/* 导航按钮 */}
+          {totalSlides > 1 && (
+            <>
+              <CarouselNavButton direction="prev" onClick={goToPrevSlide} color={theme.primaryColor} />
+              <CarouselNavButton direction="next" onClick={goToNextSlide} color={theme.primaryColor} />
+            </>
+          )}
+
+          {/* 轮播内容 */}
+          <div className="flex overflow-x-auto snap-x snap-mandatory pb-8 scrollbar-hide carousel-slides">
+            {items.map((item, index) => (
               <div
+                id={`carousel-slide-${index}`}
                 key={item.id}
-                className="flex-shrink-0 w-full md:w-1/2 px-2 snap-start"
+                className={cn(
+                  "flex-shrink-0 w-full px-4 snap-start transition-opacity duration-300",
+                  {
+                    "opacity-100": activeSlide === index,
+                    "opacity-60": activeSlide !== index
+                  }
+                )}
                 style={{ scrollSnapAlign: 'start' }}
               >
                 <CardItem item={item} theme={theme} layout={layout} />
               </div>
             ))}
           </div>
-          <div className="flex justify-center mt-4 space-x-2">
-            {items.map((_, index) => (
-              <button
-                key={index}
-                className="w-2 h-2 rounded-full bg-gray-300"
-                style={{ backgroundColor: index === 0 ? theme.primaryColor : undefined }}
-              />
-            ))}
-          </div>
+
+          {/* 指示器 */}
+          {totalSlides > 1 && (
+            <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center py-2">
+              <div className="flex space-x-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
+                {items.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={cn(
+                      "transition-all duration-300 rounded-full focus:outline-none",
+                      activeSlide === index ? "w-6 h-2" : "w-2 h-2"
+                    )}
+                    style={{
+                      backgroundColor: activeSlide === index
+                        ? theme.primaryColor
+                        : `${theme.primaryColor}40`
+                    }}
+                    aria-label={`转到幻灯片 ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : null}
 

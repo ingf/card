@@ -338,3 +338,45 @@ input, textarea, select {
   background-color: #9ca3af;
   border-radius: 1px;
 }
+
+/* 轮播布局增强样式 */
+.carousel-container {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.carousel-slides {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carousel-slides::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.carousel-slide-active {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.carousel-slide-next {
+  animation: slideInRight 0.5s ease forwards;
+}
+
+.carousel-slide-prev {
+  animation: slideInLeft 0.5s ease forwards;
+}
