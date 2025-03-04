@@ -59,22 +59,23 @@ export const LayoutSchema = z.object({
     "carousel",
     "timeline",
     "tabs",
-    "accordion"
+    "accordion",
+    "education",
+    "finance"
   ]).default("grid"),
-  columns: z.number().min(1).max(6).default(2),
-  spacing: z.number().optional(),
+  columns: z.number().optional().default(2),
   alignment: z.enum(["start", "center", "end"]).optional().default("start"),
-  itemStyle: z.object({
-    borderRadius: z.string().optional(),
-    padding: z.string().optional(),
-    shadow: z.enum(["none", "sm", "md", "lg"]).optional(),
-    numberStyle: z.object({
-      show: z.boolean().default(true),
-      position: z.enum(["top-left", "top-right", "center-left"]).optional().default("center-left"),
-      color: z.string().optional(),
-      size: z.number().optional(),
-      shape: z.enum(["circle", "square", "pill"]).optional().default("circle")
-    }).optional()
+  spacing: z.enum(["none", "small", "medium", "large"]).optional().default("medium"),
+  itemStyle: z.enum(["card", "minimal", "bordered"]).optional().default("card"),
+  templateStyle: z.object({
+    headerBgColor: z.string().optional(),
+    bodyBgColor: z.string().optional(),
+    borderColor: z.string().optional(),
+    headerFont: z.string().optional(),
+    bodyFont: z.string().optional(),
+    numberBgColor: z.string().optional(),
+    dividerStyle: z.enum(["solid", "dashed", "dotted"]).optional(),
+    dotColor: z.string().optional()
   }).optional()
 })
 

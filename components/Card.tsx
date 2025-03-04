@@ -236,7 +236,19 @@ const CarouselNavButton = ({
 };
 
 export function Card({ data }: CardProps) {
-  const { title, subtitle, description, layout = { type: 'grid' }, theme: themeInput = {}, items = [], footer } = data;
+  const {
+    title,
+    subtitle,
+    description,
+    layout: layoutInput = {
+      type: 'grid',
+      columns: 2,
+      alignment: 'start'
+    },
+    theme: themeInput = {},
+    items = [],
+    footer
+  } = data;
 
   // 设置默认主题
   const defaultTheme: Theme = {
@@ -293,14 +305,14 @@ export function Card({ data }: CardProps) {
 
   // 自动轮播
   useEffect(() => {
-    if (layout.type === 'carousel' && totalSlides > 1) {
+    if (layoutInput.type === 'carousel' && totalSlides > 1) {
       const interval = setInterval(() => {
         goToNextSlide();
       }, 5000); // 5秒切换一次
 
       return () => clearInterval(interval);
     }
-  }, [layout.type, totalSlides, goToNextSlide]);
+  }, [layoutInput.type, totalSlides, goToNextSlide]);
 
   // 动画类
   const animationClasses = {
@@ -312,29 +324,204 @@ export function Card({ data }: CardProps) {
 
   // 布局类
   const getLayoutClasses = () => {
-    if (layout.type === 'grid') {
+    if (layoutInput.type === 'grid') {
       return {
         'grid-cols-1': true,
-        'md:grid-cols-2': layout.columns === 2,
-        'md:grid-cols-3': layout.columns === 3,
-        'md:grid-cols-4': layout.columns === 4,
-        'md:grid-cols-5': layout.columns === 5,
-        'md:grid-cols-6': layout.columns === 6,
+        'md:grid-cols-2': layoutInput.columns === 2,
+        'md:grid-cols-3': layoutInput.columns === 3,
+        'md:grid-cols-4': layoutInput.columns === 4,
+        'md:grid-cols-5': layoutInput.columns === 5,
+        'md:grid-cols-6': layoutInput.columns === 6,
       };
     }
 
-    if (layout.type === 'masonry') {
+    if (layoutInput.type === 'masonry') {
       return {
         'columns-1': true,
-        'md:columns-2': layout.columns === 2,
-        'md:columns-3': layout.columns === 3,
-        'md:columns-4': layout.columns === 4,
+        'md:columns-2': layoutInput.columns === 2,
+        'md:columns-3': layoutInput.columns === 3,
+        'md:columns-4': layoutInput.columns === 4,
         'space-y-4': true
       };
     }
 
     return {};
   };
+
+  // 教育模板渲染
+  if (layoutInput.type === 'education') {
+    const educationBorderColor = layoutInput.templateStyle?.borderColor || '#FF5722';
+    const educationHeaderBgColor = layoutInput.templateStyle?.headerBgColor || '#FF5722';
+    const educationBodyBgColor = layoutInput.templateStyle?.bodyBgColor || '#ffffff';
+    const educationNumberBgColor = layoutInput.templateStyle?.numberBgColor || '#FF5722';
+
+    return (
+      <div className="w-full max-w-5xl mx-auto animate-fade-in">
+        <div
+          className="rounded-lg overflow-hidden border-4 education-template"
+          style={{
+            borderColor: educationBorderColor,
+            backgroundColor: educationBodyBgColor,
+            fontFamily: layoutInput.templateStyle?.bodyFont || "'Noto Sans SC', sans-serif"
+          }}
+        >
+          {/* 标题区域 */}
+          <div
+            className="p-4 text-center relative"
+            style={{
+              backgroundColor: educationHeaderBgColor,
+              color: '#ffffff',
+              fontFamily: layoutInput.templateStyle?.headerFont || "'Noto Sans SC', sans-serif",
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E\")"
+            }}
+          >
+            <div className="absolute right-2 top-2 bg-black text-white px-3 py-1 text-sm font-bold">
+              建议收藏
+            </div>
+            <h1 className="text-3xl font-bold mb-2 mt-4">{title}</h1>
+            {subtitle && <h2 className="text-xl opacity-90 mb-2">{subtitle}</h2>}
+          </div>
+
+          {/* 内容区域 */}
+          <div className="p-6">
+            {items.map((item, index) => (
+              <div
+                key={item.id}
+                className="mb-8 last:mb-0"
+              >
+                <div className="flex items-start gap-4 mb-2">
+                  <div
+                    className="flex-shrink-0 w-14 h-14 flex items-center justify-center text-2xl font-bold"
+                    style={{
+                      backgroundColor: educationNumberBgColor,
+                      color: '#ffffff',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </div>
+                  <h3 className="text-xl font-bold mt-2">{item.title}</h3>
+                </div>
+
+                <div
+                  className="ml-18 pl-4 border-l-2 py-2"
+                  style={{ borderColor: educationBorderColor }}
+                >
+                  <p className="text-gray-700 whitespace-pre-line">{item.description}</p>
+
+                  {item.actionStep && (
+                    <div className="mt-3 text-gray-600 italic">
+                      {item.actionStep}
+                    </div>
+                  )}
+                </div>
+
+                {index < items.length - 1 && (
+                  <div
+                    className="border-b my-6 mx-4"
+                    style={{
+                      borderStyle: (layoutInput.templateStyle?.dividerStyle as any) || 'dashed',
+                      borderColor: educationBorderColor
+                    }}
+                  ></div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 金融模板渲染
+  if (layoutInput.type === 'finance') {
+    const financeHeaderColor = layoutInput.templateStyle?.headerBgColor || '#1890FF';
+    const financeDotColor = layoutInput.templateStyle?.dotColor || '#1890FF';
+    const financeBodyBgColor = layoutInput.templateStyle?.bodyBgColor || '#E6F7FF';
+
+    return (
+      <div className="w-full max-w-5xl mx-auto animate-fade-in">
+        <div
+          className="rounded-lg overflow-hidden finance-template"
+          style={{
+            backgroundColor: financeBodyBgColor,
+            fontFamily: layoutInput.templateStyle?.bodyFont || "'Noto Sans SC', sans-serif"
+          }}
+        >
+          {/* 标题区域 */}
+          <div className="p-4 text-center relative">
+            <div className="finance-dots-top" style={{ backgroundImage: `radial-gradient(circle, ${financeHeaderColor} 3px, transparent 3px)` }}></div>
+            <h1
+              className="text-3xl font-bold mb-2 mt-4"
+              style={{
+                color: financeHeaderColor,
+                fontFamily: layoutInput.templateStyle?.headerFont || "'Noto Sans SC', sans-serif"
+              }}
+            >
+              {title}
+            </h1>
+            {subtitle && (
+              <h2
+                className="text-xl mb-2"
+                style={{ color: financeHeaderColor }}
+              >
+                {subtitle}
+              </h2>
+            )}
+            <div className="finance-dots-bottom" style={{ backgroundImage: `radial-gradient(circle, ${financeHeaderColor} 3px, transparent 3px)` }}></div>
+          </div>
+
+          {/* 内容区域 */}
+          <div className="p-6">
+            {items.map((item, index) => (
+              <div
+                key={item.id}
+                className="mb-6 last:mb-0 bg-white rounded-lg p-4 shadow-sm"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                    style={{ backgroundColor: financeDotColor }}
+                  >
+                    Q
+                  </div>
+                  <h3
+                    className="text-lg font-bold"
+                    style={{ color: financeHeaderColor }}
+                  >
+                    {item.title}
+                  </h3>
+                </div>
+
+                <div className="ml-9">
+                  <p className="text-gray-700">{item.description}</p>
+
+                  {item.actionStep && (
+                    <div
+                      className="mt-3 p-2 rounded-lg"
+                      style={{ backgroundColor: `${financeDotColor}15` }}
+                    >
+                      <span className="font-medium">提示：</span> {item.actionStep}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* 页脚 */}
+          {footer && footer.text && (
+            <div
+              className="p-3 text-center text-sm"
+              style={{ color: financeHeaderColor }}
+            >
+              {footer.text}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -373,25 +560,25 @@ export function Card({ data }: CardProps) {
       </div>
 
       {/* 内容区域 - 根据布局类型渲染 */}
-      {layout.type === 'grid' || layout.type === 'masonry' ? (
+      {layoutInput.type === 'grid' || layoutInput.type === 'masonry' ? (
         <div className={cn(
-          layout.type === 'grid' ? 'grid' : '',
+          layoutInput.type === 'grid' ? 'grid' : '',
           "gap-8",
           getLayoutClasses()
         )}>
           {items.map((item) => (
-            <div key={item.id} className={layout.type === 'masonry' ? 'mb-4 break-inside-avoid' : ''}>
-              <CardItem item={item} theme={theme} layout={layout} />
+            <div key={item.id} className={layoutInput.type === 'masonry' ? 'mb-4 break-inside-avoid' : ''}>
+              <CardItem item={item} theme={theme} layout={layoutInput} />
             </div>
           ))}
         </div>
-      ) : layout.type === 'list' ? (
+      ) : layoutInput.type === 'list' ? (
         <div className="space-y-4">
           {items.map((item) => (
-            <CardItem key={item.id} item={item} theme={theme} layout={layout} />
+            <CardItem key={item.id} item={item} theme={theme} layout={layoutInput} />
           ))}
         </div>
-      ) : layout.type === 'timeline' ? (
+      ) : layoutInput.type === 'timeline' ? (
         <div className="relative border-l-2 border-gray-200 ml-6 pl-8 space-y-8">
           {items.map((item) => (
             <div key={item.id} className="relative">
@@ -399,11 +586,11 @@ export function Card({ data }: CardProps) {
                 className="absolute w-4 h-4 rounded-full -left-10 top-2"
                 style={{ backgroundColor: theme.primaryColor }}
               />
-              <CardItem item={item} theme={theme} layout={layout} />
+              <CardItem item={item} theme={theme} layout={layoutInput} />
             </div>
           ))}
         </div>
-      ) : layout.type === 'tabs' ? (
+      ) : layoutInput.type === 'tabs' ? (
         <div className="flex flex-col">
           <div className="flex border-b overflow-x-auto">
             {items.map((item) => (
@@ -421,14 +608,14 @@ export function Card({ data }: CardProps) {
               <CardItem
                 item={items.find(item => item.highlight) || items[0]}
                 theme={theme}
-                layout={layout}
+                layout={layoutInput}
               />
             ) : (
-              <CardItem item={items[0]} theme={theme} layout={layout} />
+              <CardItem item={items[0]} theme={theme} layout={layoutInput} />
             )}
           </div>
         </div>
-      ) : layout.type === 'accordion' ? (
+      ) : layoutInput.type === 'accordion' ? (
         <div className="space-y-3">
           {items.map((item, index) => (
             <details
@@ -446,7 +633,7 @@ export function Card({ data }: CardProps) {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  {layout.itemStyle?.numberStyle?.show && (
+                  {layoutInput.itemStyle?.numberStyle?.show && (
                     <div
                       className="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-medium flex-shrink-0"
                       style={{ backgroundColor: theme.primaryColor }}
@@ -508,7 +695,7 @@ export function Card({ data }: CardProps) {
             </details>
           ))}
         </div>
-      ) : layout.type === 'carousel' ? (
+      ) : layoutInput.type === 'carousel' ? (
         <div className="relative overflow-hidden rounded-lg carousel-container">
           {/* 导航按钮 */}
           {totalSlides > 1 && (
@@ -533,7 +720,7 @@ export function Card({ data }: CardProps) {
                 )}
                 style={{ scrollSnapAlign: 'start' }}
               >
-                <CardItem item={item} theme={theme} layout={layout} />
+                <CardItem item={item} theme={theme} layout={layoutInput} />
               </div>
             ))}
           </div>

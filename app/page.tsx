@@ -135,6 +135,22 @@ export default function Home() {
             <div className="preview-item closed"></div>
           </div>
         );
+      case "education":
+        return (
+          <div className="layout-preview education-preview">
+            <div className="preview-header"></div>
+            <div className="preview-item with-number"></div>
+            <div className="preview-item with-number"></div>
+          </div>
+        );
+      case "finance":
+        return (
+          <div className="layout-preview finance-preview">
+            <div className="preview-dots"></div>
+            <div className="preview-item with-dot"></div>
+            <div className="preview-item with-dot"></div>
+          </div>
+        );
       default:
         return null;
     }
@@ -148,7 +164,9 @@ export default function Home() {
     { value: "carousel", label: "轮播布局", description: "适合浏览多个项目" },
     { value: "timeline", label: "时间线布局", description: "适合展示有序或时间相关的内容" },
     { value: "tabs", label: "标签页布局", description: "适合分类内容" },
-    { value: "accordion", label: "手风琴布局", description: "适合需要展开/折叠的详细内容" }
+    { value: "accordion", label: "手风琴布局", description: "适合需要展开/折叠的详细内容" },
+    { value: "education", label: "教育模板", description: "适合教学内容和课程大纲" },
+    { value: "finance", label: "金融模板", description: "适合金融知识和问答形式" }
   ];
 
   // 切换卡片视图布局
