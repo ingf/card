@@ -1,0 +1,29 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f8fafc" />
+  
+  <!-- 标题 -->
+  <rect x="100" y="20" width="200" height="30" rx="4" fill="#e2e8f0" />
+  
+  <!-- 标签页导航 -->
+  <rect x="50" y="70" width="300" height="40" rx="0" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+  
+  <!-- 标签页按钮 -->
+  <rect x="50" y="70" width="80" height="40" rx="0" fill="#f1f5f9" />
+  <rect x="65" y="85" width="50" height="10" rx="2" fill="#475569" />
+  
+  <rect x="130" y="70" width="80" height="40" rx="0" fill="#ffffff" />
+  <rect x="145" y="85" width="50" height="10" rx="2" fill="#94a3b8" />
+  
+  <rect x="210" y="70" width="80" height="40" rx="0" fill="#ffffff" />
+  <rect x="225" y="85" width="50" height="10" rx="2" fill="#94a3b8" />
+  
+  <!-- 活动标签指示器 -->
+  <rect x="50" y="108" width="80" height="2" rx="0" fill="#3b82f6" />
+  
+  <!-- 标签内容区域 -->
+  <rect x="50" y="110" width="300" height="170" rx="0" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+  
+  <!-- 标签内容 -->
+  <rect x="70" y="130" width="260" height="20" rx="2" fill="#94a3b8" />
+  <rect x="70" y="160" width="260" height="100" rx="2" fill="#e2e8f0" />
+</svg> 

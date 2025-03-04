@@ -1,0 +1,33 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f8fafc" />
+  
+  <!-- 标题 -->
+  <rect x="100" y="20" width="200" height="30" rx="4" fill="#e2e8f0" />
+  
+  <!-- 手风琴项目 1 (展开) -->
+  <rect x="50" y="70" width="300" height="40" rx="4" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+  <rect x="70" y="85" width="200" height="10" rx="2" fill="#475569" />
+  <!-- 展开/折叠图标 -->
+  <circle cx="330" cy="90" r="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+  <line x1="325" y1="90" x2="335" y2="90" stroke="#475569" stroke-width="2" />
+  
+  <!-- 展开内容 -->
+  <rect x="50" y="110" width="300" height="70" rx="0" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+  <rect x="70" y="130" width="260" height="40" rx="2" fill="#e2e8f0" />
+  
+  <!-- 手风琴项目 2 (折叠) -->
+  <rect x="50" y="190" width="300" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+  <rect x="70" y="205" width="200" height="10" rx="2" fill="#94a3b8" />
+  <!-- 展开/折叠图标 -->
+  <circle cx="330" cy="210" r="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+  <line x1="325" y1="210" x2="335" y2="210" stroke="#475569" stroke-width="2" />
+  <line x1="330" y1="205" x2="330" y2="215" stroke="#475569" stroke-width="2" />
+  
+  <!-- 手风琴项目 3 (折叠) -->
+  <rect x="50" y="240" width="300" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+  <rect x="70" y="255" width="200" height="10" rx="2" fill="#94a3b8" />
+  <!-- 展开/折叠图标 -->
+  <circle cx="330" cy="260" r="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+  <line x1="325" y1="260" x2="335" y2="260" stroke="#475569" stroke-width="2" />
+  <line x1="330" y1="255" x2="330" y2="265" stroke="#475569" stroke-width="2" />
+</svg> 

@@ -11,6 +11,7 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLayout, setSelectedLayout] = useState<Layout["type"]>("grid");
+  const [showLayoutPreview, setShowLayoutPreview] = useState<Layout["type"] | null>(null);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +63,79 @@ export default function Home() {
     }
   };
 
+  // 布局预览图渲染函数
+  const renderLayoutPreview = (layoutType: Layout["type"]) => {
+    switch (layoutType) {
+      case "grid":
+        return (
+          <div className="layout-preview grid-preview">
+            <div className="preview-item"></div>
+            <div className="preview-item"></div>
+            <div className="preview-item"></div>
+            <div className="preview-item"></div>
+          </div>
+        );
+      case "list":
+        return (
+          <div className="layout-preview list-preview">
+            <div className="preview-item"></div>
+            <div className="preview-item"></div>
+            <div className="preview-item"></div>
+          </div>
+        );
+      case "masonry":
+        return (
+          <div className="layout-preview masonry-preview">
+            <div className="preview-item" style={{ height: '18px' }}></div>
+            <div className="preview-item" style={{ height: '24px' }}></div>
+            <div className="preview-item" style={{ height: '16px' }}></div>
+            <div className="preview-item" style={{ height: '20px' }}></div>
+          </div>
+        );
+      case "carousel":
+        return (
+          <div className="layout-preview carousel-preview">
+            <div className="preview-item active"></div>
+            <div className="preview-dots">
+              <span className="active"></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        );
+      case "timeline":
+        return (
+          <div className="layout-preview timeline-preview">
+            <div className="timeline-line"></div>
+            <div className="preview-item"></div>
+            <div className="preview-item"></div>
+            <div className="preview-item"></div>
+          </div>
+        );
+      case "tabs":
+        return (
+          <div className="layout-preview tabs-preview">
+            <div className="tabs-header">
+              <span className="active"></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div className="preview-item"></div>
+          </div>
+        );
+      case "accordion":
+        return (
+          <div className="layout-preview accordion-preview">
+            <div className="preview-item open"></div>
+            <div className="preview-item closed"></div>
+            <div className="preview-item closed"></div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   // 布局选项
   const layoutOptions = [
     { value: "grid", label: "网格布局", description: "适合展示平等重要性的项目" },
@@ -96,23 +170,30 @@ export default function Home() {
           />
 
           {/* 布局选择 */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-700">
               选择布局样式（可选）
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {layoutOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => setSelectedLayout(option.value as Layout["type"])}
-                  className={`p-3 border rounded-lg text-left transition-colors ${selectedLayout === option.value
-                      ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200 text-gray-800"
-                      : "border-gray-200 hover:border-gray-300 text-gray-700"
+                  className={`flex flex-col h-36 border rounded-lg overflow-hidden transition-all ${selectedLayout === option.value
+                      ? "border-blue-500 ring-2 ring-blue-200 shadow-md"
+                      : "border-gray-200 hover:border-gray-300 hover:shadow"
                     }`}
                 >
-                  <div className="font-medium">{option.label}</div>
-                  <div className="text-xs text-gray-500 mt-1">{option.description}</div>
+                  <div className="bg-gray-50 p-3 flex-1 flex items-center justify-center">
+                    <div className="w-full h-full max-w-[80px]">
+                      {renderLayoutPreview(option.value as Layout["type"])}
+                    </div>
+                  </div>
+                  <div className="p-2 bg-white">
+                    <div className="font-medium text-gray-800 text-sm">{option.label}</div>
+                    <div className="text-xs text-gray-500 mt-0.5 line-clamp-2">{option.description}</div>
+                  </div>
                 </button>
               ))}
             </div>
