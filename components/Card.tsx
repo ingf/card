@@ -236,36 +236,26 @@ const CarouselNavButton = ({
 };
 
 export function Card({ data }: CardProps) {
-  const {
-    title,
-    subtitle,
-    description,
-    items,
-    theme: themeInput,
-    layout = {
-      type: 'grid',
-      columns: 2,
-      alignment: 'start'
-    },
-    footer
-  } = data
+  const { title, subtitle, description, layout = { type: 'grid' }, theme: themeInput = {}, items = [], footer } = data;
 
-  // 创建默认主题
+  // 设置默认主题
   const defaultTheme: Theme = {
-    primaryColor: '#FF9966',
-    backgroundColor: '#FFFFFF',
-    textColor: '#000000',
-    borderRadius: '0.5rem',
+    primaryColor: '#3b82f6',
+    backgroundColor: '#ffffff',
+    textColor: '#1f2937',
     cardStyle: 'elevated',
+    borderRadius: '0.5rem',
     colorScheme: 'light',
     animation: 'none'
   };
 
-  // 合并用户提供的主题和默认主题
+  // 使用合并后的主题
   const theme: Theme = {
     ...defaultTheme,
-    ...(themeInput || {})
+    ...themeInput
   };
+
+  const textColor = theme.textColor;
 
   // 轮播状态
   const [activeSlide, setActiveSlide] = useState(0);
@@ -358,7 +348,7 @@ export function Card({ data }: CardProps) {
       <div className="mb-8 text-center">
         <h1
           className="text-4xl font-bold mb-2"
-          style={{ color: theme.textColor }}
+          style={{ color: textColor }}
         >
           {title}
         </h1>
@@ -366,7 +356,7 @@ export function Card({ data }: CardProps) {
         {subtitle && (
           <h2
             className="text-xl text-gray-600 mb-4"
-            style={{ color: `${theme.textColor}99` }}
+            style={{ color: `${textColor}99` }}
           >
             {subtitle}
           </h2>
@@ -375,7 +365,7 @@ export function Card({ data }: CardProps) {
         {description && (
           <p
             className="max-w-2xl mx-auto text-gray-600"
-            style={{ color: `${theme.textColor}99` }}
+            style={{ color: `${textColor}99` }}
           >
             {description}
           </p>
@@ -443,21 +433,21 @@ export function Card({ data }: CardProps) {
           {items.map((item, index) => (
             <details
               key={item.id}
-              className={`border rounded-lg overflow-hidden transition-all duration-200 ${
-                item.highlight ? 'shadow-md' : 'shadow-sm'
-              }`}
+              className={`border rounded-lg overflow-hidden transition-all duration-200 ${item.highlight ? 'shadow-md' : 'shadow-sm'
+                }`}
               open={item.highlight}
             >
               <summary
                 className="p-4 cursor-pointer font-medium flex justify-between items-center hover:bg-gray-50 transition-colors"
-                style={{ 
+                style={{
                   backgroundColor: item.highlight ? `${theme.primaryColor}15` : `${theme.primaryColor}05`,
-                  borderLeft: item.highlight ? `3px solid ${theme.primaryColor}` : 'none'
+                  borderLeft: item.highlight ? `3px solid ${theme.primaryColor}` : 'none',
+                  color: textColor
                 }}
               >
                 <div className="flex items-center gap-3">
                   {layout.itemStyle?.numberStyle?.show && (
-                    <div 
+                    <div
                       className="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-medium flex-shrink-0"
                       style={{ backgroundColor: theme.primaryColor }}
                     >
@@ -466,11 +456,11 @@ export function Card({ data }: CardProps) {
                   )}
                   <span className="line-clamp-1">{item.title}</span>
                 </div>
-                <svg 
-                  className="w-5 h-5 transition-transform duration-200" 
+                <svg
+                  className="w-5 h-5 transition-transform duration-200"
                   style={{ transform: item.highlight ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                  fill="none" 
-                  stroke="currentColor" 
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -478,15 +468,14 @@ export function Card({ data }: CardProps) {
               </summary>
               <div className="p-4 animate-fade-in">
                 {item.visualElement && (
-                  <div className={`mb-3 ${
-                    item.visualElement.position === 'top' ? 'w-full' : 
-                    item.visualElement.position === 'right' ? 'float-right ml-4 mb-2' : 
-                    item.visualElement.position === 'left' ? 'float-left mr-4 mb-2' : ''
-                  }`} style={{ 
-                    maxWidth: item.visualElement.position === 'top' ? '100%' : '40%',
-                  }}>
+                  <div className={`mb-3 ${item.visualElement.position === 'top' ? 'w-full' :
+                    item.visualElement.position === 'right' ? 'float-right ml-4 mb-2' :
+                      item.visualElement.position === 'left' ? 'float-left mr-4 mb-2' : ''
+                    }`} style={{
+                      maxWidth: item.visualElement.position === 'top' ? '100%' : '40%',
+                    }}>
                     {item.visualElement.type === 'icon' ? (
-                      <div 
+                      <div
                         className="w-10 h-10 flex items-center justify-center rounded-full"
                         style={{ backgroundColor: `${theme.primaryColor}20` }}
                       >
@@ -495,9 +484,9 @@ export function Card({ data }: CardProps) {
                         </span>
                       </div>
                     ) : item.visualElement.type === 'image' ? (
-                      <img 
-                        src={item.visualElement.source} 
-                        alt={item.visualElement.alt || item.title} 
+                      <img
+                        src={item.visualElement.source}
+                        alt={item.visualElement.alt || item.title}
                         className="w-full h-auto rounded-lg object-cover"
                       />
                     ) : null}
