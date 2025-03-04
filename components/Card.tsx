@@ -439,27 +439,79 @@ export function Card({ data }: CardProps) {
           </div>
         </div>
       ) : layout.type === 'accordion' ? (
-        <div className="space-y-2">
-          {items.map((item) => (
+        <div className="space-y-3">
+          {items.map((item, index) => (
             <details
               key={item.id}
-              className="border rounded-lg overflow-hidden"
+              className={`border rounded-lg overflow-hidden transition-all duration-200 ${
+                item.highlight ? 'shadow-md' : 'shadow-sm'
+              }`}
               open={item.highlight}
             >
               <summary
-                className="p-4 cursor-pointer font-medium flex justify-between items-center"
-                style={{ backgroundColor: `${theme.primaryColor}10` }}
+                className="p-4 cursor-pointer font-medium flex justify-between items-center hover:bg-gray-50 transition-colors"
+                style={{ 
+                  backgroundColor: item.highlight ? `${theme.primaryColor}15` : `${theme.primaryColor}05`,
+                  borderLeft: item.highlight ? `3px solid ${theme.primaryColor}` : 'none'
+                }}
               >
-                <span>{item.title}</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center gap-3">
+                  {layout.itemStyle?.numberStyle?.show && (
+                    <div 
+                      className="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-medium flex-shrink-0"
+                      style={{ backgroundColor: theme.primaryColor }}
+                    >
+                      {index + 1}
+                    </div>
+                  )}
+                  <span className="line-clamp-1">{item.title}</span>
+                </div>
+                <svg 
+                  className="w-5 h-5 transition-transform duration-200" 
+                  style={{ transform: item.highlight ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <div className="p-4">
-                <p>{item.description}</p>
+              <div className="p-4 animate-fade-in">
+                {item.visualElement && (
+                  <div className={`mb-3 ${
+                    item.visualElement.position === 'top' ? 'w-full' : 
+                    item.visualElement.position === 'right' ? 'float-right ml-4 mb-2' : 
+                    item.visualElement.position === 'left' ? 'float-left mr-4 mb-2' : ''
+                  }`} style={{ 
+                    maxWidth: item.visualElement.position === 'top' ? '100%' : '40%',
+                  }}>
+                    {item.visualElement.type === 'icon' ? (
+                      <div 
+                        className="w-10 h-10 flex items-center justify-center rounded-full"
+                        style={{ backgroundColor: `${theme.primaryColor}20` }}
+                      >
+                        <span className="text-xl" style={{ color: theme.primaryColor }}>
+                          {item.icon?.value || '📌'}
+                        </span>
+                      </div>
+                    ) : item.visualElement.type === 'image' ? (
+                      <img 
+                        src={item.visualElement.source} 
+                        alt={item.visualElement.alt || item.title} 
+                        className="w-full h-auto rounded-lg object-cover"
+                      />
+                    ) : null}
+                  </div>
+                )}
+                <p className="text-gray-700">{item.description}</p>
                 {item.actionStep && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <div className="text-sm font-medium mb-1">Action Step:</div>
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <div className="text-sm font-medium mb-1 flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                      行动步骤:
+                    </div>
                     <p className="text-gray-600">{item.actionStep}</p>
                   </div>
                 )}

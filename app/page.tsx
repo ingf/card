@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/Card";
 import { CardSchema } from "@/lib/schemas/card";
 import type { Card as CardType, Layout } from "@/lib/schemas/card";
@@ -11,12 +11,14 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLayout, setSelectedLayout] = useState<Layout["type"]>("grid");
-  const [showLayoutPreview, setShowLayoutPreview] = useState<Layout["type"] | null>(null);
+  const [activeViewLayout, setActiveViewLayout] = useState<Layout["type"] | null>(null);
+  const [isLayoutChanging, setIsLayoutChanging] = useState(false);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setCardData(null);
+    setActiveViewLayout(null);
 
     if (!input.trim()) {
       setError("请输入内容");
@@ -53,6 +55,8 @@ export default function Home() {
         };
       }
 
+      // 设置初始视图布局为生成的布局
+      setActiveViewLayout(validatedData.layout?.type || "grid");
       setCardData(validatedData);
       setError("");
     } catch (e) {
@@ -147,6 +151,35 @@ export default function Home() {
     { value: "accordion", label: "手风琴布局", description: "适合需要展开/折叠的详细内容" }
   ];
 
+  // 切换卡片视图布局
+  const switchCardLayout = (layoutType: Layout["type"]) => {
+    if (!cardData || activeViewLayout === layoutType) return;
+
+    setIsLayoutChanging(true);
+
+    // 添加短暂延迟以便动画效果更明显
+    setTimeout(() => {
+      setActiveViewLayout(layoutType);
+      setIsLayoutChanging(false);
+    }, 300);
+  };
+
+  // 渲染卡片视图
+  const renderCardWithLayout = () => {
+    if (!cardData) return null;
+
+    // 创建一个新的卡片数据对象，使用当前选择的布局
+    const cardWithLayout: CardType = {
+      ...cardData,
+      layout: {
+        ...(cardData.layout || {}),
+        type: activeViewLayout || "grid"
+      }
+    };
+
+    return <Card data={cardWithLayout} />;
+  };
+
   return (
     <main className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -169,36 +202,6 @@ export default function Home() {
             disabled={isLoading}
           />
 
-          {/* 布局选择 */}
-          <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700">
-              选择布局样式（可选）
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {layoutOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setSelectedLayout(option.value as Layout["type"])}
-                  className={`flex flex-col h-36 border rounded-lg overflow-hidden transition-all ${selectedLayout === option.value
-                      ? "border-blue-500 ring-2 ring-blue-200 shadow-md"
-                      : "border-gray-200 hover:border-gray-300 hover:shadow"
-                    }`}
-                >
-                  <div className="bg-gray-50 p-3 flex-1 flex items-center justify-center">
-                    <div className="w-full h-full max-w-[80px]">
-                      {renderLayoutPreview(option.value as Layout["type"])}
-                    </div>
-                  </div>
-                  <div className="p-2 bg-white">
-                    <div className="font-medium text-gray-800 text-sm">{option.label}</div>
-                    <div className="text-xs text-gray-500 mt-0.5 line-clamp-2">{option.description}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
           <button
             type="submit"
             className="w-full px-6 py-3 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
@@ -217,8 +220,65 @@ export default function Home() {
 
         {/* 卡片展示 */}
         {cardData && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <Card data={cardData} />
+          <div className="space-y-6 animate-fade-in">
+            {/* 布局切换器 - 优化后的UI */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-4 border-b border-gray-100">
+                <h3 className="text-sm font-medium text-gray-700">切换布局视图：</h3>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-px bg-gray-100">
+                {layoutOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => switchCardLayout(option.value as Layout["type"])}
+                    className={`flex flex-col items-center py-3 px-2 transition-all ${activeViewLayout === option.value
+                      ? "bg-blue-50 border-t-2 border-blue-500"
+                      : "bg-white hover:bg-gray-50"
+                      }`}
+                    disabled={isLayoutChanging}
+                  >
+                    <div className="w-12 h-12 mb-2 flex items-center justify-center">
+                      {renderLayoutPreview(option.value as Layout["type"])}
+                    </div>
+                    <span className={`text-xs font-medium ${activeViewLayout === option.value ? "text-blue-600" : "text-gray-700"
+                      }`}>
+                      {option.label}
+                    </span>
+                    <span className="text-xs text-gray-500 mt-1 text-center line-clamp-1">
+                      {option.description}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 移动端布局切换器 */}
+            <div className="md:hidden bg-white rounded-lg shadow-sm p-3 border border-gray-100 overflow-x-auto scrollbar-hide">
+              <div className="flex space-x-2 min-w-max">
+                {layoutOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => switchCardLayout(option.value as Layout["type"])}
+                    className={`flex items-center px-3 py-2 rounded-full transition-all ${activeViewLayout === option.value
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    disabled={isLayoutChanging}
+                  >
+                    <span className="w-4 h-4 mr-1.5 flex-shrink-0">
+                      {renderLayoutPreview(option.value as Layout["type"])}
+                    </span>
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 卡片内容 */}
+            <div className={`bg-white rounded-xl shadow-lg p-6 transition-opacity duration-300 ${isLayoutChanging ? 'opacity-50' : 'opacity-100'}`}>
+              {renderCardWithLayout()}
+            </div>
           </div>
         )}
       </div>
