@@ -31,6 +31,24 @@ const platformStyles = {
   "default": { color: "#3B82F6", name: "默认" }
 };
 
+// 添加背景样式配置
+const posterBackgrounds = {
+  "simple": [
+    "bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-100",
+    "bg-gradient-to-br from-pink-50 to-purple-100 border border-pink-100",
+    "bg-gradient-to-br from-green-50 to-emerald-100 border border-green-100",
+    "bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-100",
+    "bg-gradient-to-br from-sky-50 to-cyan-100 border border-sky-100"
+  ],
+  "complex": [
+    "bg-white",
+    "bg-gray-50 border border-gray-100",
+    "bg-blue-50 border border-blue-100",
+    "bg-amber-50 border border-amber-100",
+    "bg-emerald-50 border border-emerald-100"
+  ]
+};
+
 // 单个卡片项组件
 const CardItem = ({ item, theme, layout }: {
   item: CardItemType,
@@ -284,33 +302,47 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
 
   // 根据海报格式渲染不同内容
   const renderCardContent = (item: CardItemType, index: number) => {
+    // 根据索引选择背景样式
+    const bgIndex = index % posterBackgrounds.simple.length;
+    const simpleBg = posterBackgrounds.simple[bgIndex];
+    const complexBg = posterBackgrounds.complex[bgIndex];
+
     if (posterFormat === "simple") {
-      // 简单海报只显示标题和简短描述
+      // 简单海报只显示标题和简短描述，添加艺术字体和背景
       return (
-        <div className="flex flex-col h-full">
-          <div className="bg-blue-500 text-white w-16 h-16 rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-6">
+        <div className={`flex flex-col h-full ${simpleBg} p-6 rounded-xl`}>
+          <div className="bg-white text-blue-500 w-16 h-16 rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-6 shadow-md border-4 border-blue-100">
             {index + 1}
           </div>
 
-          <h3 className="text-2xl font-bold text-center mb-4 text-gray-800">{item.title}</h3>
+          <h3 className="text-2xl font-bold text-center mb-4 text-gray-800 font-serif tracking-wide">
+            {item.title}
+          </h3>
 
-          {/* 只显示描述的前1-2句，修改文字颜色为深灰色 */}
-          <div className="text-center text-lg text-gray-700 px-4">
+          {/* 只显示描述的前1-2句，使用艺术字体 */}
+          <div className="text-center text-lg text-gray-700 px-4 font-medium leading-relaxed">
             {item.description.split('.')[0]}.
             {item.description.split('.')[1] && `${item.description.split('.')[1]}.`}
+          </div>
+
+          {/* 添加装饰元素 */}
+          <div className="mt-6 flex justify-center">
+            <div className="h-1 w-16 bg-blue-300 rounded-full opacity-70"></div>
           </div>
         </div>
       );
     } else if (posterFormat === "complex") {
-      // 复杂海报显示完整内容，包括行动步骤
+      // 复杂海报显示完整内容，包括行动步骤，添加背景
       return (
-        <div className="flex flex-col h-full">
+        <div className={`flex flex-col h-full ${complexBg} p-6 rounded-xl`}>
           <div className="flex items-center gap-4 mb-6">
-            <div className="bg-blue-500 text-white w-14 h-14 rounded-full flex items-center justify-center font-bold text-2xl flex-shrink-0">
+            <div className="bg-blue-500 text-white w-14 h-14 rounded-full flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow-md">
               {index + 1}
             </div>
 
-            <h3 className="text-2xl font-bold text-gray-800">{item.title}</h3>
+            <h3 className="text-2xl font-bold text-gray-800 font-serif">
+              {item.title}
+            </h3>
           </div>
 
           <div className="text-gray-700 leading-relaxed mb-6 text-lg">
@@ -318,7 +350,7 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
           </div>
 
           {item.actionStep && (
-            <div className="mt-auto bg-blue-50 p-4 rounded-lg border border-blue-100">
+            <div className="mt-auto bg-white/80 backdrop-blur-sm p-4 rounded-lg border border-blue-200 shadow-sm">
               <div className="font-medium text-blue-800 mb-2">行动步骤:</div>
               <div className="text-blue-700">
                 {item.actionStep}
@@ -424,9 +456,7 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
                 {data.items && data.items[currentSlide] && (
                   <div className="w-full h-full">
                     <div
-                      className={`${posterFormat === "simple"
-                          ? "bg-white/95 rounded-xl overflow-hidden mb-4 h-full flex flex-col shadow-sm border border-gray-100"
-                          : "bg-white rounded-xl overflow-hidden mb-4 h-full flex flex-col"
+                      className={`overflow-hidden mb-4 h-full flex flex-col ${posterFormat === "standard" ? "bg-white rounded-xl" : ""
                         }`}
                     >
                       {renderCardContent(data.items[currentSlide], currentSlide)}
