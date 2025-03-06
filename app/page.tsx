@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Card } from "@/components/Card";
+import { LayoutSwitcher } from "@/components/LayoutSwitcher";
 import { CardSchema } from "@/lib/schemas/card";
 import type { Card as CardType, Layout } from "@/lib/schemas/card";
 
@@ -50,8 +51,11 @@ export default function Home() {
       // 如果用户选择了布局，覆盖AI生成的布局
       if (selectedLayout && selectedLayout !== validatedData.layout?.type) {
         validatedData.layout = {
-          ...validatedData.layout,
-          type: selectedLayout
+          type: selectedLayout,
+          columns: validatedData.layout?.columns || 3,
+          alignment: validatedData.layout?.alignment || "center",
+          spacing: validatedData.layout?.spacing || "medium",
+          itemStyle: validatedData.layout?.itemStyle || "card"
         };
       }
 
@@ -66,108 +70,6 @@ export default function Home() {
       setIsLoading(false);
     }
   };
-
-  // 布局预览图渲染函数
-  const renderLayoutPreview = (layoutType: Layout["type"]) => {
-    switch (layoutType) {
-      case "grid":
-        return (
-          <div className="layout-preview grid-preview">
-            <div className="preview-item"></div>
-            <div className="preview-item"></div>
-            <div className="preview-item"></div>
-            <div className="preview-item"></div>
-          </div>
-        );
-      case "list":
-        return (
-          <div className="layout-preview list-preview">
-            <div className="preview-item"></div>
-            <div className="preview-item"></div>
-            <div className="preview-item"></div>
-          </div>
-        );
-      case "masonry":
-        return (
-          <div className="layout-preview masonry-preview">
-            <div className="preview-item" style={{ height: '18px' }}></div>
-            <div className="preview-item" style={{ height: '24px' }}></div>
-            <div className="preview-item" style={{ height: '16px' }}></div>
-            <div className="preview-item" style={{ height: '20px' }}></div>
-          </div>
-        );
-      case "carousel":
-        return (
-          <div className="layout-preview carousel-preview">
-            <div className="preview-item active"></div>
-            <div className="preview-dots">
-              <span className="active"></span>
-              <span></span>
-              <span></span>
-            </div>
-          </div>
-        );
-      case "timeline":
-        return (
-          <div className="layout-preview timeline-preview">
-            <div className="timeline-line"></div>
-            <div className="preview-item"></div>
-            <div className="preview-item"></div>
-            <div className="preview-item"></div>
-          </div>
-        );
-      case "tabs":
-        return (
-          <div className="layout-preview tabs-preview">
-            <div className="tabs-header">
-              <span className="active"></span>
-              <span></span>
-              <span></span>
-            </div>
-            <div className="preview-item"></div>
-          </div>
-        );
-      case "accordion":
-        return (
-          <div className="layout-preview accordion-preview">
-            <div className="preview-item open"></div>
-            <div className="preview-item closed"></div>
-            <div className="preview-item closed"></div>
-          </div>
-        );
-      case "education":
-        return (
-          <div className="layout-preview education-preview">
-            <div className="preview-header"></div>
-            <div className="preview-item with-number"></div>
-            <div className="preview-item with-number"></div>
-          </div>
-        );
-      case "finance":
-        return (
-          <div className="layout-preview finance-preview">
-            <div className="preview-dots"></div>
-            <div className="preview-item with-dot"></div>
-            <div className="preview-item with-dot"></div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  // 布局选项
-  const layoutOptions = [
-    { value: "grid", label: "网格布局", description: "适合展示平等重要性的项目" },
-    { value: "list", label: "列表布局", description: "适合线性阅读的内容" },
-    { value: "masonry", label: "瀑布流布局", description: "适合不同高度的内容" },
-    { value: "carousel", label: "轮播布局", description: "适合浏览多个项目" },
-    { value: "timeline", label: "时间线布局", description: "适合展示有序或时间相关的内容" },
-    { value: "tabs", label: "标签页布局", description: "适合分类内容" },
-    { value: "accordion", label: "手风琴布局", description: "适合需要展开/折叠的详细内容" },
-    { value: "education", label: "教育模板", description: "适合教学内容和课程大纲" },
-    { value: "finance", label: "金融模板", description: "适合金融知识和问答形式" }
-  ];
 
   // 切换卡片视图布局
   const switchCardLayout = (layoutType: Layout["type"]) => {
@@ -190,8 +92,11 @@ export default function Home() {
     const cardWithLayout: CardType = {
       ...cardData,
       layout: {
-        ...(cardData.layout || {}),
-        type: activeViewLayout || "grid"
+        type: activeViewLayout || "grid",
+        columns: cardData.layout?.columns || 3,
+        alignment: cardData.layout?.alignment || "center",
+        spacing: cardData.layout?.spacing || "medium",
+        itemStyle: cardData.layout?.itemStyle || "card"
       }
     };
 
@@ -199,14 +104,14 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <main className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="flex-grow flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 标题 */}
         <h1 className="text-3xl font-bold text-center text-gray-800">
           AI 信息卡片生成器
         </h1>
 
-        <p className="text-center text-gray-600">
+        <p className="text-center text-gray-600 mt-2 mb-8">
           输入任何主题，AI将生成结构化的信息卡片，支持多种布局和样式
         </p>
 
@@ -238,63 +143,16 @@ export default function Home() {
 
         {/* 卡片展示 */}
         {cardData && (
-          <div className="space-y-6 animate-fade-in">
-            {/* 布局切换器 - 优化后的UI */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-100">
-                <h3 className="text-sm font-medium text-gray-700">切换布局视图：</h3>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-px bg-gray-100">
-                {layoutOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => switchCardLayout(option.value as Layout["type"])}
-                    className={`flex flex-col items-center py-3 px-2 transition-all ${activeViewLayout === option.value
-                      ? "bg-blue-50 border-t-2 border-blue-500"
-                      : "bg-white hover:bg-gray-50"
-                      }`}
-                    disabled={isLayoutChanging}
-                  >
-                    <div className="w-12 h-12 mb-2 flex items-center justify-center">
-                      {renderLayoutPreview(option.value as Layout["type"])}
-                    </div>
-                    <span className={`text-xs font-medium ${activeViewLayout === option.value ? "text-blue-600" : "text-gray-700"
-                      }`}>
-                      {option.label}
-                    </span>
-                    <span className="text-xs text-gray-500 mt-1 text-center line-clamp-1">
-                      {option.description}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 移动端布局切换器 */}
-            <div className="md:hidden bg-white rounded-lg shadow-sm p-3 border border-gray-100 overflow-x-auto scrollbar-hide">
-              <div className="flex space-x-2 min-w-max">
-                {layoutOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => switchCardLayout(option.value as Layout["type"])}
-                    className={`flex items-center px-3 py-2 rounded-full transition-all ${activeViewLayout === option.value
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    disabled={isLayoutChanging}
-                  >
-                    <span className="w-4 h-4 mr-1.5 flex-shrink-0">
-                      {renderLayoutPreview(option.value as Layout["type"])}
-                    </span>
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="space-y-6 animate-fade-in flex-grow flex flex-col">
+            {/* 布局切换器组件 */}
+            <LayoutSwitcher
+              activeLayout={activeViewLayout}
+              onLayoutChange={switchCardLayout}
+              isChanging={isLayoutChanging}
+            />
 
             {/* 卡片内容 */}
-            <div className={`bg-white rounded-xl shadow-lg p-6 transition-opacity duration-300 ${isLayoutChanging ? 'opacity-50' : 'opacity-100'}`}>
+            <div className={`bg-white rounded-xl shadow-lg p-6 transition-opacity duration-300 flex-grow ${isLayoutChanging ? 'opacity-50' : 'opacity-100'}`}>
               {renderCardWithLayout()}
             </div>
           </div>
