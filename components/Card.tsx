@@ -297,17 +297,24 @@ export function Card({ data, platformRatio = "default" }: CardProps) {
         </div>
 
         {/* 手机框架容器 - 使用动态比例 */}
-        <div className={`mx-auto ${ratioConfig.class}`} style={{ maxWidth: ratioConfig.width }}>
+        <div
+          className={`mx-auto ${ratioConfig.class}`}
+          style={{
+            maxWidth: ratioConfig.width,
+            // 设置最小高度，确保卡片有足够的高度
+            minHeight: platformRatio === "default" ? "600px" : "auto"
+          }}
+        >
           {/* 手机框架 */}
           <div className="bg-white rounded-[32px] shadow-xl border border-gray-200 overflow-hidden h-full flex flex-col relative">
             {/* 手机顶部状态栏 */}
-            <div className="bg-gray-100 h-6 min-h-[24px] w-full flex items-center justify-between px-4 border-b border-gray-200">
+            <div className="bg-gray-100 h-8 min-h-[32px] w-full flex items-center justify-between px-4 border-b border-gray-200">
               <div className="w-16 h-2 bg-gray-300 rounded-full"></div>
               <div className="w-4 h-2 bg-gray-300 rounded-full"></div>
             </div>
 
             {/* 指示器和导航 */}
-            <div className="flex justify-between items-center px-4 py-2 bg-white">
+            <div className="flex justify-between items-center px-4 py-3 bg-white">
               <div className="text-gray-500 text-sm">
                 {currentSlide + 1} / {data.items?.length || 1}
               </div>
@@ -316,7 +323,7 @@ export function Card({ data, platformRatio = "default" }: CardProps) {
                 <button
                   onClick={prevSlide}
                   disabled={currentSlide === 0}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-1.5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   aria-label="上一张"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -325,7 +332,7 @@ export function Card({ data, platformRatio = "default" }: CardProps) {
                 <button
                   onClick={nextSlide}
                   disabled={!data.items || currentSlide >= data.items.length - 1}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-1.5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   aria-label="下一张"
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -333,33 +340,33 @@ export function Card({ data, platformRatio = "default" }: CardProps) {
               </div>
             </div>
 
-            {/* 轮播内容 - 纵向设计 */}
-            <div ref={slideRef} className="px-4 flex-grow overflow-y-auto">
+            {/* 轮播内容 - 纵向设计，增加内容区域高度 */}
+            <div ref={slideRef} className="px-4 flex-grow overflow-y-auto" style={{ minHeight: "400px" }}>
               <div className="transition-all duration-300 ease-in-out h-full">
                 {data.items && data.items[currentSlide] && (
                   <div className="w-full h-full">
                     <div className="bg-white rounded-xl overflow-hidden mb-4 h-full flex flex-col">
                       {/* 卡片头部 */}
-                      <div className="flex items-center gap-3 p-3 border-b border-gray-100">
-                        <div className="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                      <div className="flex items-center gap-3 p-4 border-b border-gray-100">
+                        <div className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0">
                           {currentSlide + 1}
                         </div>
 
-                        <h3 className="text-base font-bold text-gray-800 line-clamp-1">
+                        <h3 className="text-lg font-bold text-gray-800 line-clamp-1">
                           {data.items[currentSlide].title}
                         </h3>
                       </div>
 
-                      {/* 卡片内容 */}
-                      <div className="p-3 text-gray-700 leading-relaxed flex-grow overflow-y-auto text-sm">
+                      {/* 卡片内容 - 增加内边距和字体大小 */}
+                      <div className="p-5 text-gray-700 leading-relaxed flex-grow overflow-y-auto text-base">
                         {data.items[currentSlide].description}
                       </div>
 
-                      {/* 行动步骤 (如果有) */}
+                      {/* 行动步骤 (如果有) - 增加内边距 */}
                       {data.items[currentSlide].actionStep && (
-                        <div className="mx-3 mb-3 p-2 bg-blue-50 rounded-lg border border-blue-100">
-                          <div className="font-medium text-blue-800 text-xs">行动步骤:</div>
-                          <div className="text-blue-700 text-xs">
+                        <div className="mx-4 mb-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                          <div className="font-medium text-blue-800 mb-1 text-sm">行动步骤:</div>
+                          <div className="text-blue-700 text-sm">
                             {data.items[currentSlide].actionStep}
                           </div>
                         </div>
@@ -371,19 +378,19 @@ export function Card({ data, platformRatio = "default" }: CardProps) {
             </div>
 
             {/* 底部指示器点 */}
-            <div className="flex justify-center py-2 gap-1.5">
+            <div className="flex justify-center py-3 gap-1.5">
               {data.items && data.items.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${currentSlide === index ? 'bg-blue-500 w-3' : 'bg-gray-300'}`}
+                  className={`w-2 h-2 rounded-full transition-all ${currentSlide === index ? 'bg-blue-500 w-4' : 'bg-gray-300'}`}
                   aria-label={`跳转到第 ${index + 1} 张`}
                 />
               ))}
             </div>
 
             {/* 手机底部导航栏 */}
-            <div className="h-1 bg-gray-200 rounded-full mx-auto w-1/3 mb-2"></div>
+            <div className="h-1.5 bg-gray-200 rounded-full mx-auto w-1/3 mb-3"></div>
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/Card";
-import { LayoutSwitcher } from "@/components/LayoutSwitcher";
+// import { LayoutSwitcher } from "@/components/LayoutSwitcher"; // 注释掉
 import { CardSchema } from "@/lib/schemas/card";
 import type { Card as CardType, Layout } from "@/lib/schemas/card";
 import { Sparkles, Loader2, Send } from "lucide-react";
@@ -12,9 +12,9 @@ export default function Home() {
   const [cardData, setCardData] = useState<CardType | null>(null);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedLayout, setSelectedLayout] = useState<Layout["type"]>("grid");
-  const [activeViewLayout, setActiveViewLayout] = useState<Layout["type"] | null>(null);
-  const [isLayoutChanging, setIsLayoutChanging] = useState(false);
+  // const [selectedLayout, setSelectedLayout] = useState<Layout["type"]>("grid"); // 注释掉
+  // const [activeViewLayout, setActiveViewLayout] = useState<Layout["type"] | null>(null); // 注释掉
+  // const [isLayoutChanging, setIsLayoutChanging] = useState(false); // 注释掉
   const [selectedPlatform, setSelectedPlatform] = useState<string>("default");
   const [selectedRatio, setSelectedRatio] = useState<string>("default");
 
@@ -22,7 +22,7 @@ export default function Home() {
     e.preventDefault();
     setError("");
     setCardData(null);
-    setActiveViewLayout(null);
+    // setActiveViewLayout(null); // 注释掉
 
     if (!input.trim()) {
       setError("请输入内容");
@@ -51,19 +51,16 @@ export default function Home() {
       const validatedData = CardSchema.parse(data);
       console.log("Validated data:", validatedData);
 
-      // 如果用户选择了布局，覆盖AI生成的布局
-      if (selectedLayout && selectedLayout !== validatedData.layout?.type) {
-        validatedData.layout = {
-          type: selectedLayout,
-          columns: validatedData.layout?.columns || 3,
-          alignment: validatedData.layout?.alignment || "center",
-          spacing: validatedData.layout?.spacing || "medium",
-          itemStyle: validatedData.layout?.itemStyle || "card"
-        };
-      }
+      // 默认设置为轮播布局
+      validatedData.layout = {
+        type: "carousel",
+        columns: 1,
+        alignment: "center",
+        spacing: "medium",
+        itemStyle: "card"
+      };
 
-      // 设置初始视图布局为生成的布局
-      setActiveViewLayout(validatedData.layout?.type || "grid");
+      // 设置卡片数据
       setCardData(validatedData);
       setError("");
     } catch (e) {
@@ -74,87 +71,88 @@ export default function Home() {
     }
   };
 
-  // 切换卡片视图布局
-  const switchCardLayout = (layoutType: Layout["type"]) => {
-    if (!cardData || activeViewLayout === layoutType) return;
-
-    setIsLayoutChanging(true);
-
-    // 添加短暂延迟以便动画效果更明显
-    setTimeout(() => {
-      setActiveViewLayout(layoutType);
-      setIsLayoutChanging(false);
-    }, 300);
-  };
+  // 移除布局切换相关函数
+  // const switchCardLayout = (layoutType: Layout["type"]) => { ... }; // 注释掉
 
   // 渲染卡片视图
   const renderCardWithLayout = () => {
     if (!cardData) return null;
-
-    // 创建一个新的卡片数据对象，使用当前选择的布局
-    const cardWithLayout: CardType = {
-      ...cardData,
-      layout: {
-        type: activeViewLayout || "grid",
-        columns: cardData.layout?.columns || 3,
-        alignment: cardData.layout?.alignment || "center",
-        spacing: cardData.layout?.spacing || "medium",
-        itemStyle: cardData.layout?.itemStyle || "card"
-      }
-    };
-
-    return <Card data={cardWithLayout} platformRatio={selectedRatio} />;
+    return <Card data={cardData} platformRatio={selectedRatio} />;
   };
 
+  // 定义平台配置对象，包含名称、颜色、比例和图标
+  const platformConfigs = {
+    default: {
+      name: "默认",
+      color: "bg-blue-500",
+      ratio: "default",
+      icon: "🌐"
+    },
+    xiaohongshu: {
+      name: "小红书",
+      color: "bg-red-500",
+      ratio: "4:5",
+      icon: "📱"
+    },
+    douyin: {
+      name: "抖音",
+      color: "bg-black",
+      ratio: "9:16",
+      icon: "📹"
+    },
+    twitter: {
+      name: "Twitter",
+      color: "bg-blue-400",
+      ratio: "4:3",
+      icon: "🐦"
+    },
+    weibo: {
+      name: "微博",
+      color: "bg-yellow-600",
+      ratio: "3:4",
+      icon: "📰"
+    },
+    instagram: {
+      name: "Instagram",
+      color: "bg-pink-500",
+      ratio: "1:1",
+      icon: "📷"
+    },
+    facebook: {
+      name: "Facebook",
+      color: "bg-blue-600",
+      ratio: "16:9",
+      icon: "👥"
+    }
+  };
+
+  // 修改 handlePlatformChange 函数，移除布局切换逻辑
   const handlePlatformChange = (platform: string) => {
     setSelectedPlatform(platform);
 
-    // 根据平台设置不同的比例
-    const platformRatios: Record<string, string> = {
-      xiaohongshu: "4:5",
-      douyin: "9:16",
-      twitter: "4:3",
-      weibo: "3:4",
-      facebook: "1:1",
-      default: "default"
-    };
+    // 从平台配置中获取对应的比例
+    const config = platformConfigs[platform as keyof typeof platformConfigs] || platformConfigs.default;
+    setSelectedRatio(config.ratio);
 
-    setSelectedRatio(platformRatios[platform] || "default");
-
-    // 如果已有卡片数据，可以根据平台调整布局
+    // 如果已有卡片数据，保持轮播布局
     if (cardData) {
-      // 根据不同平台设置不同的布局参数
-      const platformLayouts: Record<string, Partial<Layout>> = {
-        xiaohongshu: { type: "carousel", columns: 1, spacing: "medium", itemStyle: "card" },
-        douyin: { type: "carousel", columns: 1, spacing: "small", itemStyle: "minimal" },
-        twitter: { type: "carousel", columns: 1, spacing: "large", itemStyle: "card" },
-        weibo: { type: "carousel", columns: 1, spacing: "medium", itemStyle: "bordered" },
-        default: { type: activeViewLayout || "grid", columns: 3, spacing: "medium", itemStyle: "card" }
-      };
-
-      setActiveViewLayout("carousel");
-
-      // 更新卡片布局
-      const newLayout = platformLayouts[platform] || platformLayouts.default;
       setCardData({
         ...cardData,
         layout: {
-          ...cardData.layout,
-          ...newLayout
+          type: "carousel",
+          columns: 1,
+          spacing: "medium",
+          alignment: "center",
+          itemStyle: "card"
         }
       });
     }
   };
 
-  // 添加比例选择器函数
-  const handleRatioChange = (ratio: string) => {
-    setSelectedRatio(ratio);
-  };
-
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex flex-col">
       <div className="flex-grow flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* 标题区域 - 更现代的设计 */}
+        {/* 标题区域 */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center mb-4">
             <Sparkles className="h-8 w-8 text-blue-500 mr-2" />
@@ -163,11 +161,11 @@ export default function Home() {
             </h1>
           </div>
           <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-            输入任何主题，AI 将为您生成结构化的信息卡片，支持多种布局和样式
+            输入任何主题，AI 将为您生成结构化的信息卡片，支持多种平台预览
           </p>
         </div>
 
-        {/* 输入表单 - 更现代的设计 */}
+        {/* 输入表单 */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
           <form onSubmit={handleFormSubmit} className="space-y-6">
             <div className="relative">
@@ -205,7 +203,7 @@ export default function Home() {
           </form>
         </div>
 
-        {/* 错误提示 - 更现代的设计 */}
+        {/* 错误提示 */}
         {error && (
           <div className="p-4 text-red-500 bg-red-50 rounded-xl border border-red-200 mb-8 animate-fade-in shadow-sm">
             <div className="flex items-center">
@@ -217,147 +215,40 @@ export default function Home() {
           </div>
         )}
 
-        {/* 卡片展示 - 修改为横向滑动布局 */}
+        {/* 卡片展示 */}
         {cardData && (
           <div className="space-y-6 animate-fade-in flex-grow flex flex-col">
             {/* 平台选择器 */}
             <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 border border-gray-100">
               <div className="flex flex-col space-y-2">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">选择平台适配</h3>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handlePlatformChange("default")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "default"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    默认
-                  </button>
-                  <button
-                    onClick={() => handlePlatformChange("xiaohongshu")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "xiaohongshu"
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    小红书
-                  </button>
-                  <button
-                    onClick={() => handlePlatformChange("douyin")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "douyin"
-                      ? "bg-black text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    抖音
-                  </button>
-                  <button
-                    onClick={() => handlePlatformChange("twitter")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "twitter"
-                      ? "bg-blue-400 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    Twitter
-                  </button>
-                  <button
-                    onClick={() => handlePlatformChange("weibo")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "weibo"
-                      ? "bg-yellow-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    微博
-                  </button>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">选择平台预览</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {Object.entries(platformConfigs).map(([key, config]) => (
+                    <button
+                      key={key}
+                      onClick={() => handlePlatformChange(key)}
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${selectedPlatform === key
+                        ? `${config.color} text-white`
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                    >
+                      <div className="flex items-center">
+                        <span className="mr-2 text-lg">{config.icon}</span>
+                        <span>{config.name}</span>
+                      </div>
+                      <div className="text-xs opacity-80">
+                        {config.ratio !== "default" && config.ratio}
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* 比例选择器 */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 border border-gray-100">
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">选择比例</h3>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleRatioChange("default")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "default"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    默认
-                  </button>
-                  <button
-                    onClick={() => handleRatioChange("1:1")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "1:1"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    方形 (1:1)
-                  </button>
-                  <button
-                    onClick={() => handleRatioChange("3:4")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "3:4"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    竖屏 (3:4)
-                  </button>
-                  <button
-                    onClick={() => handleRatioChange("4:5")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "4:5"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    竖屏 (4:5)
-                  </button>
-                  <button
-                    onClick={() => handleRatioChange("9:16")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "9:16"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    故事 (9:16)
-                  </button>
-                  <button
-                    onClick={() => handleRatioChange("4:3")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "4:3"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    横屏 (4:3)
-                  </button>
-                  <button
-                    onClick={() => handleRatioChange("16:9")}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "16:9"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    演示 (16:9)
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* 布局切换器组件 */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 border border-gray-100">
-              <LayoutSwitcher
-                activeLayout={activeViewLayout}
-                onLayoutChange={switchCardLayout}
-                isChanging={isLayoutChanging}
-              />
-            </div>
-
-            {/* 卡片内容 - 修改为传递比例参数 */}
+            {/* 卡片内容 */}
             <div
-              className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 transition-all duration-300 flex-grow border border-gray-100 overflow-hidden ${isLayoutChanging ? 'opacity-50 scale-98' : 'opacity-100 scale-100'}`}
+              className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 transition-all duration-300 flex-grow border border-gray-100 overflow-hidden"
+              style={{ minHeight: "700px" }}
             >
               {/* 平台预览提示 */}
               {selectedPlatform !== "default" && (
@@ -365,17 +256,15 @@ export default function Home() {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
-                  <span>当前预览适配于: <strong>{
-                    selectedPlatform === "xiaohongshu" ? "小红书" :
-                      selectedPlatform === "douyin" ? "抖音" :
-                        selectedPlatform === "twitter" ? "Twitter" :
-                          selectedPlatform === "weibo" ? "微博" : "默认"
-                  }</strong></span>
+                  <span>
+                    当前预览适配于: <strong>{platformConfigs[selectedPlatform]?.name || "默认"}</strong>
+                    {selectedRatio !== "default" && <span className="ml-1">({selectedRatio})</span>}
+                  </span>
                 </div>
               )}
 
-              {/* 渲染卡片 - 传递比例参数 */}
-              <div className="mx-auto transition-all duration-300">
+              {/* 渲染卡片 */}
+              <div className="mx-auto transition-all duration-300 flex items-center justify-center" style={{ minHeight: "600px" }}>
                 {renderCardWithLayout()}
               </div>
             </div>
