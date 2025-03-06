@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/Card";
 import { LayoutSwitcher } from "@/components/LayoutSwitcher";
 import { CardSchema } from "@/lib/schemas/card";
 import type { Card as CardType, Layout } from "@/lib/schemas/card";
+import { Sparkles, Loader2, Send } from "lucide-react";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
@@ -104,60 +105,95 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="flex-grow flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* 标题 */}
-        <h1 className="text-3xl font-bold text-center text-gray-800">
-          AI 信息卡片生成器
-        </h1>
+    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex flex-col">
+      <div className="flex-grow flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* 标题区域 - 更现代的设计 */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center mb-4">
+            <Sparkles className="h-8 w-8 text-blue-500 mr-2" />
+            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+              AI 信息卡片生成器
+            </h1>
+          </div>
+          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+            输入任何主题，AI 将为您生成结构化的信息卡片，支持多种布局和样式
+          </p>
+        </div>
 
-        <p className="text-center text-gray-600 mt-2 mb-8">
-          输入任何主题，AI将生成结构化的信息卡片，支持多种布局和样式
-        </p>
+        {/* 输入表单 - 更现代的设计 */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+          <form onSubmit={handleFormSubmit} className="space-y-6">
+            <div className="relative">
+              <textarea
+                className="w-full h-36 p-5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white/50 backdrop-blur-sm transition-all"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="请输入您想要生成的信息卡片内容，例如：'如何建立自律习惯'、'健康饮食的五个关键点'..."
+                disabled={isLoading}
+              />
+              {input.length > 0 && !isLoading && (
+                <span className="absolute right-4 bottom-4 text-xs text-gray-400">
+                  {input.length} 个字符
+                </span>
+              )}
+            </div>
 
-        {/* 输入表单 */}
-        <form onSubmit={handleFormSubmit} className="space-y-6">
-          <textarea
-            className="w-full h-32 p-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="请输入您想要生成的信息卡片内容，例如：'如何建立自律习惯'"
-            disabled={isLoading}
-          />
+            <button
+              type="submit"
+              className="w-full px-6 py-4 text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl hover:from-blue-600 hover:to-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 font-medium"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>AI 正在生成中...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="h-5 w-5" />
+                  <span>生成卡片</span>
+                </>
+              )}
+            </button>
+          </form>
+        </div>
 
-          <button
-            type="submit"
-            className="w-full px-6 py-3 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
-            disabled={isLoading}
-          >
-            {isLoading ? "生成中..." : "生成卡片"}
-          </button>
-        </form>
-
-        {/* 错误提示 */}
+        {/* 错误提示 - 更现代的设计 */}
         {error && (
-          <div className="p-4 text-red-500 bg-red-50 rounded-lg border border-red-200">
-            {error}
+          <div className="p-4 text-red-500 bg-red-50 rounded-xl border border-red-200 mb-8 animate-fade-in shadow-sm">
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </div>
           </div>
         )}
 
-        {/* 卡片展示 */}
+        {/* 卡片展示 - 更现代的设计 */}
         {cardData && (
           <div className="space-y-6 animate-fade-in flex-grow flex flex-col">
             {/* 布局切换器组件 */}
-            <LayoutSwitcher
-              activeLayout={activeViewLayout}
-              onLayoutChange={switchCardLayout}
-              isChanging={isLayoutChanging}
-            />
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 border border-gray-100">
+              <LayoutSwitcher
+                activeLayout={activeViewLayout}
+                onLayoutChange={switchCardLayout}
+                isChanging={isLayoutChanging}
+              />
+            </div>
 
             {/* 卡片内容 */}
-            <div className={`bg-white rounded-xl shadow-lg p-6 transition-opacity duration-300 flex-grow ${isLayoutChanging ? 'opacity-50' : 'opacity-100'}`}>
+            <div className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 transition-all duration-300 flex-grow border border-gray-100 ${isLayoutChanging ? 'opacity-50 scale-98' : 'opacity-100 scale-100'}`}>
               {renderCardWithLayout()}
             </div>
           </div>
         )}
       </div>
+
+      {/* 页脚 */}
+      <footer className="w-full py-4 text-center text-gray-500 text-sm">
+        <p>AI 信息卡片生成器 © {new Date().getFullYear()}</p>
+      </footer>
     </main>
   );
 }
