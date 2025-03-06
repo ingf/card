@@ -16,6 +16,7 @@ export default function Home() {
   const [activeViewLayout, setActiveViewLayout] = useState<Layout["type"] | null>(null);
   const [isLayoutChanging, setIsLayoutChanging] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string>("default");
+  const [selectedRatio, setSelectedRatio] = useState<string>("default");
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,11 +103,24 @@ export default function Home() {
       }
     };
 
-    return <Card data={cardWithLayout} />;
+    return <Card data={cardWithLayout} platformRatio={selectedRatio} />;
   };
 
   const handlePlatformChange = (platform: string) => {
     setSelectedPlatform(platform);
+
+    // 根据平台设置不同的比例
+    const platformRatios: Record<string, string> = {
+      xiaohongshu: "4:5",
+      douyin: "9:16",
+      twitter: "4:3",
+      weibo: "3:4",
+      facebook: "1:1",
+      default: "default"
+    };
+
+    setSelectedRatio(platformRatios[platform] || "default");
+
     // 如果已有卡片数据，可以根据平台调整布局
     if (cardData) {
       // 根据不同平台设置不同的布局参数
@@ -130,6 +144,11 @@ export default function Home() {
         }
       });
     }
+  };
+
+  // 添加比例选择器函数
+  const handleRatioChange = (ratio: string) => {
+    setSelectedRatio(ratio);
   };
 
   return (
@@ -209,8 +228,8 @@ export default function Home() {
                   <button
                     onClick={() => handlePlatformChange("default")}
                     className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "default"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                   >
                     默认
@@ -218,8 +237,8 @@ export default function Home() {
                   <button
                     onClick={() => handlePlatformChange("xiaohongshu")}
                     className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "xiaohongshu"
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-red-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                   >
                     小红书
@@ -227,8 +246,8 @@ export default function Home() {
                   <button
                     onClick={() => handlePlatformChange("douyin")}
                     className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "douyin"
-                        ? "bg-black text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-black text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                   >
                     抖音
@@ -236,8 +255,8 @@ export default function Home() {
                   <button
                     onClick={() => handlePlatformChange("twitter")}
                     className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "twitter"
-                        ? "bg-blue-400 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-blue-400 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                   >
                     Twitter
@@ -245,11 +264,83 @@ export default function Home() {
                   <button
                     onClick={() => handlePlatformChange("weibo")}
                     className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "weibo"
-                        ? "bg-yellow-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-yellow-600 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                   >
                     微博
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 比例选择器 */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 border border-gray-100">
+              <div className="flex flex-col space-y-2">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">选择比例</h3>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleRatioChange("default")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "default"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    默认
+                  </button>
+                  <button
+                    onClick={() => handleRatioChange("1:1")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "1:1"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    方形 (1:1)
+                  </button>
+                  <button
+                    onClick={() => handleRatioChange("3:4")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "3:4"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    竖屏 (3:4)
+                  </button>
+                  <button
+                    onClick={() => handleRatioChange("4:5")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "4:5"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    竖屏 (4:5)
+                  </button>
+                  <button
+                    onClick={() => handleRatioChange("9:16")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "9:16"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    故事 (9:16)
+                  </button>
+                  <button
+                    onClick={() => handleRatioChange("4:3")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "4:3"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    横屏 (4:3)
+                  </button>
+                  <button
+                    onClick={() => handleRatioChange("16:9")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedRatio === "16:9"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    演示 (16:9)
                   </button>
                 </div>
               </div>
@@ -264,10 +355,9 @@ export default function Home() {
               />
             </div>
 
-            {/* 卡片内容 - 修改为横向滑动布局 */}
+            {/* 卡片内容 - 修改为传递比例参数 */}
             <div
-              className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 transition-all duration-300 flex-grow border border-gray-100 overflow-hidden ${isLayoutChanging ? 'opacity-50 scale-98' : 'opacity-100 scale-100'
-                }`}
+              className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 transition-all duration-300 flex-grow border border-gray-100 overflow-hidden ${isLayoutChanging ? 'opacity-50 scale-98' : 'opacity-100 scale-100'}`}
             >
               {/* 平台预览提示 */}
               {selectedPlatform !== "default" && (
@@ -284,14 +374,8 @@ export default function Home() {
                 </div>
               )}
 
-              {/* 渲染卡片 */}
-              <div className={`
-                ${selectedPlatform === "xiaohongshu" ? "max-w-[375px]" :
-                  selectedPlatform === "douyin" ? "max-w-[360px]" :
-                    selectedPlatform === "twitter" ? "max-w-[500px]" :
-                      selectedPlatform === "weibo" ? "max-w-[450px]" : "w-full"}
-                mx-auto transition-all duration-300
-              `}>
+              {/* 渲染卡片 - 传递比例参数 */}
+              <div className="mx-auto transition-all duration-300">
                 {renderCardWithLayout()}
               </div>
             </div>
