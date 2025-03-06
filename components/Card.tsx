@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 interface CardProps {
   data: CardType;
   platformRatio?: string;
+  posterFormat?: string;
 }
 
 // 平台比例配置
@@ -259,7 +260,7 @@ const CarouselNavButton = ({
   );
 };
 
-export function Card({ data, platformRatio = "default" }: CardProps) {
+export function Card({ data, platformRatio = "default", posterFormat = "standard" }: CardProps) {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const slideRef = React.useRef<HTMLDivElement>(null);
 
@@ -281,6 +282,82 @@ export function Card({ data, platformRatio = "default" }: CardProps) {
   // 当布局类型为 carousel 时使用纵向滑动布局
   const isCarousel = data.layout?.type === "carousel";
 
+  // 根据海报格式渲染不同内容
+  const renderCardContent = (item: CardItemType, index: number) => {
+    if (posterFormat === "simple") {
+      // 简单海报只显示标题和简短描述
+      return (
+        <div className="flex flex-col h-full">
+          <div className="bg-blue-500 text-white w-16 h-16 rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-6">
+            {index + 1}
+          </div>
+
+          <h3 className="text-2xl font-bold text-center mb-4 text-gray-800">{item.title}</h3>
+
+          {/* 只显示描述的前1-2句，修改文字颜色为深灰色 */}
+          <div className="text-center text-lg text-gray-700 px-4">
+            {item.description.split('.')[0]}.
+            {item.description.split('.')[1] && `${item.description.split('.')[1]}.`}
+          </div>
+        </div>
+      );
+    } else if (posterFormat === "complex") {
+      // 复杂海报显示完整内容，包括行动步骤
+      return (
+        <div className="flex flex-col h-full">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="bg-blue-500 text-white w-14 h-14 rounded-full flex items-center justify-center font-bold text-2xl flex-shrink-0">
+              {index + 1}
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-800">{item.title}</h3>
+          </div>
+
+          <div className="text-gray-700 leading-relaxed mb-6 text-lg">
+            {item.description}
+          </div>
+
+          {item.actionStep && (
+            <div className="mt-auto bg-blue-50 p-4 rounded-lg border border-blue-100">
+              <div className="font-medium text-blue-800 mb-2">行动步骤:</div>
+              <div className="text-blue-700">
+                {item.actionStep}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    } else {
+      // 标准卡片格式 - 使用现有的渲染方式
+      return (
+        <div className="flex flex-col h-full">
+          <div className="flex items-center gap-3 p-4 border-b border-gray-100">
+            <div className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0">
+              {index + 1}
+            </div>
+
+            <h3 className="text-lg font-bold text-gray-800 line-clamp-1">
+              {item.title}
+            </h3>
+          </div>
+
+          <div className="p-5 text-gray-700 leading-relaxed flex-grow overflow-y-auto text-base">
+            {item.description}
+          </div>
+
+          {item.actionStep && (
+            <div className="mx-4 mb-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <div className="font-medium text-blue-800 mb-1 text-sm">行动步骤:</div>
+              <div className="text-blue-700 text-sm">
+                {item.actionStep}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+  };
+
   // 根据布局类型选择不同的渲染方式
   if (isCarousel) {
     return (
@@ -294,6 +371,7 @@ export function Card({ data, platformRatio = "default" }: CardProps) {
         {/* 平台比例指示器 */}
         <div className="text-center mb-4 text-sm text-gray-500">
           {platformRatio !== "default" ? `${platformRatio} 比例` : "默认比例"}
+          {posterFormat !== "standard" && ` - ${posterFormat === "simple" ? "简单海报" : "复杂海报"}`}
         </div>
 
         {/* 手机框架容器 - 使用动态比例 */}
@@ -340,37 +418,18 @@ export function Card({ data, platformRatio = "default" }: CardProps) {
               </div>
             </div>
 
-            {/* 轮播内容 - 纵向设计，增加内容区域高度 */}
+            {/* 轮播内容 - 使用新的渲染函数 */}
             <div ref={slideRef} className="px-4 flex-grow overflow-y-auto" style={{ minHeight: "400px" }}>
-              <div className="transition-all duration-300 ease-in-out h-full">
+              <div className="transition-all duration-300 ease-in-out h-full py-4">
                 {data.items && data.items[currentSlide] && (
                   <div className="w-full h-full">
-                    <div className="bg-white rounded-xl overflow-hidden mb-4 h-full flex flex-col">
-                      {/* 卡片头部 */}
-                      <div className="flex items-center gap-3 p-4 border-b border-gray-100">
-                        <div className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0">
-                          {currentSlide + 1}
-                        </div>
-
-                        <h3 className="text-lg font-bold text-gray-800 line-clamp-1">
-                          {data.items[currentSlide].title}
-                        </h3>
-                      </div>
-
-                      {/* 卡片内容 - 增加内边距和字体大小 */}
-                      <div className="p-5 text-gray-700 leading-relaxed flex-grow overflow-y-auto text-base">
-                        {data.items[currentSlide].description}
-                      </div>
-
-                      {/* 行动步骤 (如果有) - 增加内边距 */}
-                      {data.items[currentSlide].actionStep && (
-                        <div className="mx-4 mb-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                          <div className="font-medium text-blue-800 mb-1 text-sm">行动步骤:</div>
-                          <div className="text-blue-700 text-sm">
-                            {data.items[currentSlide].actionStep}
-                          </div>
-                        </div>
-                      )}
+                    <div
+                      className={`${posterFormat === "simple"
+                          ? "bg-white/95 rounded-xl overflow-hidden mb-4 h-full flex flex-col shadow-sm border border-gray-100"
+                          : "bg-white rounded-xl overflow-hidden mb-4 h-full flex flex-col"
+                        }`}
+                    >
+                      {renderCardContent(data.items[currentSlide], currentSlide)}
                     </div>
                   </div>
                 )}

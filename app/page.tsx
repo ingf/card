@@ -17,6 +17,7 @@ export default function Home() {
   // const [isLayoutChanging, setIsLayoutChanging] = useState(false); // 注释掉
   const [selectedPlatform, setSelectedPlatform] = useState<string>("default");
   const [selectedRatio, setSelectedRatio] = useState<string>("default");
+  const [posterFormat, setPosterFormat] = useState<string>("standard");
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +78,7 @@ export default function Home() {
   // 渲染卡片视图
   const renderCardWithLayout = () => {
     if (!cardData) return null;
-    return <Card data={cardData} platformRatio={selectedRatio} />;
+    return <Card data={cardData} platformRatio={selectedRatio} posterFormat={posterFormat} />;
   };
 
   // 定义平台配置对象，包含名称、颜色、比例和图标
@@ -147,6 +148,11 @@ export default function Home() {
         }
       });
     }
+  };
+
+  // 添加海报格式选择函数
+  const handlePosterFormatChange = (format: string) => {
+    setPosterFormat(format);
   };
 
   return (
@@ -241,6 +247,51 @@ export default function Home() {
                       </div>
                     </button>
                   ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 海报格式选择器 */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 border border-gray-100 mt-4">
+              <div className="flex flex-col space-y-2">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">选择海报格式</h3>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => handlePosterFormatChange("standard")}
+                    className={`px-3 py-2 rounded-lg transition-all ${posterFormat === "standard"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    <div className="flex items-center">
+                      <span className="mr-2">📄</span>
+                      <span>标准卡片</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handlePosterFormatChange("simple")}
+                    className={`px-3 py-2 rounded-lg transition-all ${posterFormat === "simple"
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    <div className="flex items-center">
+                      <span className="mr-2">🪧</span>
+                      <span>简单海报</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handlePosterFormatChange("complex")}
+                    className={`px-3 py-2 rounded-lg transition-all ${posterFormat === "complex"
+                        ? "bg-purple-500 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    <div className="flex items-center">
+                      <span className="mr-2">🖼️</span>
+                      <span>复杂海报</span>
+                    </div>
+                  </button>
                 </div>
               </div>
             </div>
