@@ -15,6 +15,7 @@ export default function Home() {
   const [selectedLayout, setSelectedLayout] = useState<Layout["type"]>("grid");
   const [activeViewLayout, setActiveViewLayout] = useState<Layout["type"] | null>(null);
   const [isLayoutChanging, setIsLayoutChanging] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<string>("default");
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,6 +105,33 @@ export default function Home() {
     return <Card data={cardWithLayout} />;
   };
 
+  const handlePlatformChange = (platform: string) => {
+    setSelectedPlatform(platform);
+    // 如果已有卡片数据，可以根据平台调整布局
+    if (cardData) {
+      // 根据不同平台设置不同的布局参数
+      const platformLayouts: Record<string, Partial<Layout>> = {
+        xiaohongshu: { type: "carousel", columns: 1, spacing: "medium", itemStyle: "card" },
+        douyin: { type: "carousel", columns: 1, spacing: "small", itemStyle: "minimal" },
+        twitter: { type: "carousel", columns: 1, spacing: "large", itemStyle: "card" },
+        weibo: { type: "carousel", columns: 1, spacing: "medium", itemStyle: "bordered" },
+        default: { type: activeViewLayout || "grid", columns: 3, spacing: "medium", itemStyle: "card" }
+      };
+
+      setActiveViewLayout("carousel");
+
+      // 更新卡片布局
+      const newLayout = platformLayouts[platform] || platformLayouts.default;
+      setCardData({
+        ...cardData,
+        layout: {
+          ...cardData.layout,
+          ...newLayout
+        }
+      });
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex flex-col">
       <div className="flex-grow flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -170,9 +198,63 @@ export default function Home() {
           </div>
         )}
 
-        {/* 卡片展示 - 更现代的设计 */}
+        {/* 卡片展示 - 修改为横向滑动布局 */}
         {cardData && (
           <div className="space-y-6 animate-fade-in flex-grow flex flex-col">
+            {/* 平台选择器 */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 border border-gray-100">
+              <div className="flex flex-col space-y-2">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">选择平台适配</h3>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handlePlatformChange("default")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "default"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    默认
+                  </button>
+                  <button
+                    onClick={() => handlePlatformChange("xiaohongshu")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "xiaohongshu"
+                        ? "bg-red-500 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    小红书
+                  </button>
+                  <button
+                    onClick={() => handlePlatformChange("douyin")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "douyin"
+                        ? "bg-black text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    抖音
+                  </button>
+                  <button
+                    onClick={() => handlePlatformChange("twitter")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "twitter"
+                        ? "bg-blue-400 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    Twitter
+                  </button>
+                  <button
+                    onClick={() => handlePlatformChange("weibo")}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${selectedPlatform === "weibo"
+                        ? "bg-yellow-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    微博
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* 布局切换器组件 */}
             <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 border border-gray-100">
               <LayoutSwitcher
@@ -182,9 +264,36 @@ export default function Home() {
               />
             </div>
 
-            {/* 卡片内容 */}
-            <div className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 transition-all duration-300 flex-grow border border-gray-100 ${isLayoutChanging ? 'opacity-50 scale-98' : 'opacity-100 scale-100'}`}>
-              {renderCardWithLayout()}
+            {/* 卡片内容 - 修改为横向滑动布局 */}
+            <div
+              className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 transition-all duration-300 flex-grow border border-gray-100 overflow-hidden ${isLayoutChanging ? 'opacity-50 scale-98' : 'opacity-100 scale-100'
+                }`}
+            >
+              {/* 平台预览提示 */}
+              {selectedPlatform !== "default" && (
+                <div className="mb-4 p-2 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <span>当前预览适配于: <strong>{
+                    selectedPlatform === "xiaohongshu" ? "小红书" :
+                      selectedPlatform === "douyin" ? "抖音" :
+                        selectedPlatform === "twitter" ? "Twitter" :
+                          selectedPlatform === "weibo" ? "微博" : "默认"
+                  }</strong></span>
+                </div>
+              )}
+
+              {/* 渲染卡片 */}
+              <div className={`
+                ${selectedPlatform === "xiaohongshu" ? "max-w-[375px]" :
+                  selectedPlatform === "douyin" ? "max-w-[360px]" :
+                    selectedPlatform === "twitter" ? "max-w-[500px]" :
+                      selectedPlatform === "weibo" ? "max-w-[450px]" : "w-full"}
+                mx-auto transition-all duration-300
+              `}>
+                {renderCardWithLayout()}
+              </div>
             </div>
           </div>
         )}

@@ -1,6 +1,8 @@
 import { Card as CardType, CardItem as CardItemType, Theme, Layout } from '@/lib/schemas/card'
 import { cn } from '@/lib/utils'
 import { useState, useCallback, useEffect } from 'react'
+import React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CardProps {
   data: CardType
@@ -236,532 +238,180 @@ const CarouselNavButton = ({
 };
 
 export function Card({ data }: CardProps) {
-  const {
-    title,
-    subtitle,
-    description,
-    layout: layoutInput = {
-      type: 'grid',
-      columns: 2,
-      alignment: 'start'
-    },
-    theme: themeInput = {},
-    items = [],
-    footer
-  } = data;
+  const [currentSlide, setCurrentSlide] = React.useState(0);
+  const slideRef = React.useRef<HTMLDivElement>(null);
 
-  // 设置默认主题
-  const defaultTheme: Theme = {
-    primaryColor: '#3b82f6',
-    backgroundColor: '#ffffff',
-    textColor: '#1f2937',
-    cardStyle: 'elevated',
-    borderRadius: '0.5rem',
-    colorScheme: 'light',
-    animation: 'none'
+  // 处理滑动到下一张卡片
+  const nextSlide = () => {
+    if (!data.items || currentSlide >= data.items.length - 1) return;
+    setCurrentSlide(prev => prev + 1);
   };
 
-  // 使用合并后的主题
-  const theme: Theme = {
-    ...defaultTheme,
-    ...themeInput
+  // 处理滑动到上一张卡片
+  const prevSlide = () => {
+    if (currentSlide <= 0) return;
+    setCurrentSlide(prev => prev - 1);
   };
 
-  const textColor = theme.textColor;
+  // 当布局类型为 carousel 时使用纵向滑动布局
+  const isCarousel = data.layout?.type === "carousel";
 
-  // 轮播状态
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const totalSlides = items.length;
-
-  // 轮播导航函数
-  const goToSlide = useCallback((index: number) => {
-    if (isAnimating) return;
-
-    setIsAnimating(true);
-    setActiveSlide(index);
-
-    // 找到对应的元素并滚动到视图
-    const slideElement = document.getElementById(`carousel-slide-${index}`);
-    if (slideElement) {
-      slideElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-    }
-
-    // 动画完成后重置状态
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 500);
-  }, [isAnimating]);
-
-  const goToNextSlide = useCallback(() => {
-    const nextSlide = (activeSlide + 1) % totalSlides;
-    goToSlide(nextSlide);
-  }, [activeSlide, totalSlides, goToSlide]);
-
-  const goToPrevSlide = useCallback(() => {
-    const prevSlide = (activeSlide - 1 + totalSlides) % totalSlides;
-    goToSlide(prevSlide);
-  }, [activeSlide, totalSlides, goToSlide]);
-
-  // 自动轮播
-  useEffect(() => {
-    if (layoutInput.type === 'carousel' && totalSlides > 1) {
-      const interval = setInterval(() => {
-        goToNextSlide();
-      }, 5000); // 5秒切换一次
-
-      return () => clearInterval(interval);
-    }
-  }, [layoutInput.type, totalSlides, goToNextSlide]);
-
-  // 动画类
-  const animationClasses = {
-    'none': '',
-    'fade': 'animate-fade-in',
-    'slide': 'animate-slide-in',
-    'zoom': 'animate-zoom-in'
-  };
-
-  // 布局类
-  const getLayoutClasses = () => {
-    if (layoutInput.type === 'grid') {
-      return {
-        'grid-cols-1': true,
-        'md:grid-cols-2': layoutInput.columns === 2,
-        'md:grid-cols-3': layoutInput.columns === 3,
-        'md:grid-cols-4': layoutInput.columns === 4,
-        'md:grid-cols-5': layoutInput.columns === 5,
-        'md:grid-cols-6': layoutInput.columns === 6,
-      };
-    }
-
-    if (layoutInput.type === 'masonry') {
-      return {
-        'columns-1': true,
-        'md:columns-2': layoutInput.columns === 2,
-        'md:columns-3': layoutInput.columns === 3,
-        'md:columns-4': layoutInput.columns === 4,
-        'space-y-4': true
-      };
-    }
-
-    return {};
-  };
-
-  // 教育模板渲染
-  if (layoutInput.type === 'education') {
-    const educationBorderColor = layoutInput.templateStyle?.borderColor || '#FF5722';
-    const educationHeaderBgColor = layoutInput.templateStyle?.headerBgColor || '#FF5722';
-    const educationBodyBgColor = layoutInput.templateStyle?.bodyBgColor || '#ffffff';
-    const educationNumberBgColor = layoutInput.templateStyle?.numberBgColor || '#FF5722';
-
+  // 根据布局类型选择不同的渲染方式
+  if (isCarousel) {
     return (
-      <div className="w-full max-w-5xl mx-auto animate-fade-in">
-        <div
-          className="rounded-lg overflow-hidden border-4 education-template"
-          style={{
-            borderColor: educationBorderColor,
-            backgroundColor: educationBodyBgColor,
-            fontFamily: layoutInput.templateStyle?.bodyFont || "'Noto Sans SC', sans-serif"
-          }}
-        >
-          {/* 标题区域 */}
-          <div
-            className="p-4 text-center relative"
-            style={{
-              backgroundColor: educationHeaderBgColor,
-              color: '#ffffff',
-              fontFamily: layoutInput.templateStyle?.headerFont || "'Noto Sans SC', sans-serif",
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E\")"
-            }}
-          >
-            <div className="absolute right-2 top-2 bg-black text-white px-3 py-1 text-sm font-bold">
-              建议收藏
-            </div>
-            <h1 className="text-3xl font-bold mb-2 mt-4">{title}</h1>
-            {subtitle && <h2 className="text-xl opacity-90 mb-2">{subtitle}</h2>}
-          </div>
+      <div className="w-full">
+        <h2 className="text-2xl font-bold text-center mb-6">{data.title}</h2>
 
-          {/* 内容区域 */}
-          <div className="p-6">
-            {items.map((item, index) => (
-              <div
-                key={item.id}
-                className="mb-8 last:mb-0"
-              >
-                <div className="flex items-start gap-4 mb-2">
-                  <div
-                    className="flex-shrink-0 w-14 h-14 flex items-center justify-center text-2xl font-bold"
-                    style={{
-                      backgroundColor: educationNumberBgColor,
-                      color: '#ffffff',
-                      borderRadius: '4px'
-                    }}
-                  >
-                    {String(index + 1).padStart(2, '0')}
-                  </div>
-                  <h3 className="text-xl font-bold mt-2">{item.title}</h3>
-                </div>
-
-                <div
-                  className="ml-18 pl-4 border-l-2 py-2"
-                  style={{ borderColor: educationBorderColor }}
-                >
-                  <p className="text-gray-700 whitespace-pre-line">{item.description}</p>
-
-                  {item.actionStep && (
-                    <div className="mt-3 text-gray-600 italic">
-                      {item.actionStep}
-                    </div>
-                  )}
-                </div>
-
-                {index < items.length - 1 && (
-                  <div
-                    className="border-b my-6 mx-4"
-                    style={{
-                      borderStyle: (layoutInput.templateStyle?.dividerStyle as any) || 'dashed',
-                      borderColor: educationBorderColor
-                    }}
-                  ></div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 金融模板渲染
-  if (layoutInput.type === 'finance') {
-    const financeHeaderColor = layoutInput.templateStyle?.headerBgColor || '#1890FF';
-    const financeDotColor = layoutInput.templateStyle?.dotColor || '#1890FF';
-    const financeBodyBgColor = layoutInput.templateStyle?.bodyBgColor || '#E6F7FF';
-
-    return (
-      <div className="w-full max-w-5xl mx-auto animate-fade-in">
-        <div
-          className="rounded-lg overflow-hidden finance-template"
-          style={{
-            backgroundColor: financeBodyBgColor,
-            fontFamily: layoutInput.templateStyle?.bodyFont || "'Noto Sans SC', sans-serif"
-          }}
-        >
-          {/* 标题区域 */}
-          <div className="p-4 text-center relative">
-            <div className="finance-dots-top" style={{ backgroundImage: `radial-gradient(circle, ${financeHeaderColor} 3px, transparent 3px)` }}></div>
-            <h1
-              className="text-3xl font-bold mb-2 mt-4"
-              style={{
-                color: financeHeaderColor,
-                fontFamily: layoutInput.templateStyle?.headerFont || "'Noto Sans SC', sans-serif"
-              }}
-            >
-              {title}
-            </h1>
-            {subtitle && (
-              <h2
-                className="text-xl mb-2"
-                style={{ color: financeHeaderColor }}
-              >
-                {subtitle}
-              </h2>
-            )}
-            <div className="finance-dots-bottom" style={{ backgroundImage: `radial-gradient(circle, ${financeHeaderColor} 3px, transparent 3px)` }}></div>
-          </div>
-
-          {/* 内容区域 */}
-          <div className="p-6">
-            {items.map((item, index) => (
-              <div
-                key={item.id}
-                className="mb-6 last:mb-0 bg-white rounded-lg p-4 shadow-sm"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                    style={{ backgroundColor: financeDotColor }}
-                  >
-                    Q
-                  </div>
-                  <h3
-                    className="text-lg font-bold"
-                    style={{ color: financeHeaderColor }}
-                  >
-                    {item.title}
-                  </h3>
-                </div>
-
-                <div className="ml-9">
-                  <p className="text-gray-700">{item.description}</p>
-
-                  {item.actionStep && (
-                    <div
-                      className="mt-3 p-2 rounded-lg"
-                      style={{ backgroundColor: `${financeDotColor}15` }}
-                    >
-                      <span className="font-medium">提示：</span> {item.actionStep}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* 页脚 */}
-          {footer && footer.text && (
-            <div
-              className="p-3 text-center text-sm"
-              style={{ color: financeHeaderColor }}
-            >
-              {footer.text}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        "w-full max-w-5xl mx-auto",
-        animationClasses[theme.animation as keyof typeof animationClasses]
-      )}
-      style={{ backgroundColor: theme.backgroundColor }}
-    >
-      {/* 标题区域 */}
-      <div className="mb-8 text-center">
-        <h1
-          className="text-4xl font-bold mb-2"
-          style={{ color: textColor }}
-        >
-          {title}
-        </h1>
-
-        {subtitle && (
-          <h2
-            className="text-xl text-gray-600 mb-4"
-            style={{ color: `${textColor}99` }}
-          >
-            {subtitle}
-          </h2>
+        {data.subtitle && (
+          <p className="text-gray-600 text-center mb-8">{data.subtitle}</p>
         )}
 
-        {description && (
-          <p
-            className="max-w-2xl mx-auto text-gray-600"
-            style={{ color: `${textColor}99` }}
-          >
-            {description}
-          </p>
-        )}
-      </div>
+        {/* 手机框架容器 */}
+        <div className="max-w-[375px] mx-auto">
+          {/* 手机框架 */}
+          <div className="bg-white rounded-[32px] shadow-xl border border-gray-200 overflow-hidden pb-4 relative">
+            {/* 手机顶部状态栏 */}
+            <div className="bg-gray-100 h-6 w-full flex items-center justify-between px-4 border-b border-gray-200">
+              <div className="w-16 h-2 bg-gray-300 rounded-full"></div>
+              <div className="w-4 h-2 bg-gray-300 rounded-full"></div>
+            </div>
 
-      {/* 内容区域 - 根据布局类型渲染 */}
-      {layoutInput.type === 'grid' || layoutInput.type === 'masonry' ? (
-        <div className={cn(
-          layoutInput.type === 'grid' ? 'grid' : '',
-          "gap-8",
-          getLayoutClasses()
-        )}>
-          {items.map((item) => (
-            <div key={item.id} className={layoutInput.type === 'masonry' ? 'mb-4 break-inside-avoid' : ''}>
-              <CardItem item={item} theme={theme} layout={layoutInput} />
-            </div>
-          ))}
-        </div>
-      ) : layoutInput.type === 'list' ? (
-        <div className="space-y-4">
-          {items.map((item) => (
-            <CardItem key={item.id} item={item} theme={theme} layout={layoutInput} />
-          ))}
-        </div>
-      ) : layoutInput.type === 'timeline' ? (
-        <div className="relative border-l-2 border-gray-200 ml-6 pl-8 space-y-8">
-          {items.map((item) => (
-            <div key={item.id} className="relative">
-              <div
-                className="absolute w-4 h-4 rounded-full -left-10 top-2"
-                style={{ backgroundColor: theme.primaryColor }}
-              />
-              <CardItem item={item} theme={theme} layout={layoutInput} />
-            </div>
-          ))}
-        </div>
-      ) : layoutInput.type === 'tabs' ? (
-        <div className="flex flex-col">
-          <div className="flex border-b overflow-x-auto">
-            {items.map((item) => (
-              <button
-                key={item.id}
-                className="px-4 py-2 font-medium border-b-2 border-transparent hover:border-gray-300"
-                style={{ borderBottomColor: item.highlight ? theme.primaryColor : 'transparent' }}
-              >
-                {item.title}
-              </button>
-            ))}
-          </div>
-          <div className="p-4">
-            {items.find(item => item.highlight) ? (
-              <CardItem
-                item={items.find(item => item.highlight) || items[0]}
-                theme={theme}
-                layout={layoutInput}
-              />
-            ) : (
-              <CardItem item={items[0]} theme={theme} layout={layoutInput} />
-            )}
-          </div>
-        </div>
-      ) : layoutInput.type === 'accordion' ? (
-        <div className="space-y-3">
-          {items.map((item, index) => (
-            <details
-              key={item.id}
-              className={`border rounded-lg overflow-hidden transition-all duration-200 ${item.highlight ? 'shadow-md' : 'shadow-sm'
-                }`}
-              open={item.highlight}
-            >
-              <summary
-                className="p-4 cursor-pointer font-medium flex justify-between items-center hover:bg-gray-50 transition-colors"
-                style={{
-                  backgroundColor: item.highlight ? `${theme.primaryColor}15` : `${theme.primaryColor}05`,
-                  borderLeft: item.highlight ? `3px solid ${theme.primaryColor}` : 'none',
-                  color: textColor
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  {layoutInput.itemStyle?.numberStyle?.show && (
-                    <div
-                      className="flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-medium flex-shrink-0"
-                      style={{ backgroundColor: theme.primaryColor }}
-                    >
-                      {index + 1}
-                    </div>
-                  )}
-                  <span className="line-clamp-1">{item.title}</span>
-                </div>
-                <svg
-                  className="w-5 h-5 transition-transform duration-200"
-                  style={{ transform: item.highlight ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            {/* 指示器和导航 */}
+            <div className="flex justify-between items-center px-4 py-3 bg-white">
+              <div className="text-gray-500 text-sm">
+                {currentSlide + 1} / {data.items?.length || 1}
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={prevSlide}
+                  disabled={currentSlide === 0}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  aria-label="上一张"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </summary>
-              <div className="p-4 animate-fade-in">
-                {item.visualElement && (
-                  <div className={`mb-3 ${item.visualElement.position === 'top' ? 'w-full' :
-                    item.visualElement.position === 'right' ? 'float-right ml-4 mb-2' :
-                      item.visualElement.position === 'left' ? 'float-left mr-4 mb-2' : ''
-                    }`} style={{
-                      maxWidth: item.visualElement.position === 'top' ? '100%' : '40%',
-                    }}>
-                    {item.visualElement.type === 'icon' ? (
-                      <div
-                        className="w-10 h-10 flex items-center justify-center rounded-full"
-                        style={{ backgroundColor: `${theme.primaryColor}20` }}
-                      >
-                        <span className="text-xl" style={{ color: theme.primaryColor }}>
-                          {item.icon?.value || '📌'}
-                        </span>
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+
+                <button
+                  onClick={nextSlide}
+                  disabled={!data.items || currentSlide >= data.items.length - 1}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  aria-label="下一张"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* 轮播内容 - 纵向设计 */}
+            <div ref={slideRef} className="px-4">
+              <div className="transition-all duration-300 ease-in-out">
+                {data.items && data.items[currentSlide] && (
+                  <div className="w-full">
+                    <div className="bg-white rounded-xl overflow-hidden mb-4">
+                      {/* 卡片头部 */}
+                      <div className="flex items-center gap-4 p-4 border-b border-gray-100">
+                        <div className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                          {currentSlide + 1}
+                        </div>
+
+                        <h3 className="text-lg font-bold text-gray-800">
+                          {data.items[currentSlide].title}
+                        </h3>
                       </div>
-                    ) : item.visualElement.type === 'image' ? (
-                      <img
-                        src={item.visualElement.source}
-                        alt={item.visualElement.alt || item.title}
-                        className="w-full h-auto rounded-lg object-cover"
-                      />
-                    ) : null}
-                  </div>
-                )}
-                <p className="text-gray-700">{item.description}</p>
-                {item.actionStep && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                    <div className="text-sm font-medium mb-1 flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                      行动步骤:
+
+                      {/* 卡片内容 */}
+                      <div className="p-4 text-gray-700 leading-relaxed">
+                        {data.items[currentSlide].description}
+                      </div>
+
+                      {/* 行动步骤 (如果有) */}
+                      {data.items[currentSlide].actionStep && (
+                        <div className="mx-4 mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                          <div className="font-medium text-blue-800 mb-1 text-sm">行动步骤:</div>
+                          <div className="text-blue-700 text-sm">
+                            {data.items[currentSlide].actionStep}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-gray-600">{item.actionStep}</p>
                   </div>
                 )}
               </div>
-            </details>
-          ))}
-        </div>
-      ) : layoutInput.type === 'carousel' ? (
-        <div className="relative overflow-hidden rounded-lg carousel-container">
-          {/* 导航按钮 */}
-          {totalSlides > 1 && (
-            <>
-              <CarouselNavButton direction="prev" onClick={goToPrevSlide} color={theme.primaryColor} />
-              <CarouselNavButton direction="next" onClick={goToNextSlide} color={theme.primaryColor} />
-            </>
-          )}
+            </div>
 
-          {/* 轮播内容 */}
-          <div className="flex overflow-x-auto snap-x snap-mandatory pb-8 scrollbar-hide carousel-slides">
-            {items.map((item, index) => (
-              <div
-                id={`carousel-slide-${index}`}
-                key={item.id}
-                className={cn(
-                  "flex-shrink-0 w-full px-4 snap-start transition-opacity duration-300",
-                  {
-                    "opacity-100": activeSlide === index,
-                    "opacity-60": activeSlide !== index
-                  }
-                )}
-                style={{ scrollSnapAlign: 'start' }}
-              >
-                <CardItem item={item} theme={theme} layout={layoutInput} />
-              </div>
-            ))}
+            {/* 底部指示器点 */}
+            <div className="flex justify-center mt-2 gap-1.5">
+              {data.items && data.items.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${currentSlide === index ? 'bg-blue-500 w-4' : 'bg-gray-300'}`}
+                  aria-label={`跳转到第 ${index + 1} 张`}
+                />
+              ))}
+            </div>
+
+            {/* 手机底部导航栏 */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 rounded-full mx-auto w-1/3 mt-2"></div>
           </div>
-
-          {/* 指示器 */}
-          {totalSlides > 1 && (
-            <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center py-2">
-              <div className="flex space-x-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
-                {items.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={cn(
-                      "transition-all duration-300 rounded-full focus:outline-none",
-                      activeSlide === index ? "w-6 h-2" : "w-2 h-2"
-                    )}
-                    style={{
-                      backgroundColor: activeSlide === index
-                        ? theme.primaryColor
-                        : `${theme.primaryColor}40`
-                    }}
-                    aria-label={`转到幻灯片 ${index + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-      ) : null}
+      </div>
+    );
+  }
 
-      {/* 页脚 */}
-      {footer && footer.text && (
-        <div className="mt-8 text-center text-sm text-gray-500">
-          {footer.text}
-          {footer.showAttribution && (
-            <div className="mt-2">
-              Generated with AI
-            </div>
-          )}
-        </div>
+  // 默认网格布局 - 修改文字颜色为黑色
+  return (
+    <div className="w-full">
+      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">{data.title}</h2>
+
+      {data.subtitle && (
+        <p className="text-gray-600 text-center mb-8">{data.subtitle}</p>
       )}
+
+      {/* 网格布局 */}
+      <div className={`
+        grid gap-6
+        ${data.layout?.columns === 1 ? 'grid-cols-1' :
+          data.layout?.columns === 2 ? 'grid-cols-1 md:grid-cols-2' :
+            'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}
+        ${data.layout?.alignment === 'left' ? 'text-left' :
+          data.layout?.alignment === 'right' ? 'text-right' :
+            'text-center'}
+      `}>
+        {data.items?.map((item, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200"
+          >
+            {/* 卡片头部 */}
+            <div className="border-b border-gray-100 p-4 flex items-center gap-3">
+              <div className="bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold">{index + 1}</span>
+              </div>
+
+              {item.title && (
+                <h3 className="text-lg font-bold text-gray-800">{item.title}</h3>
+              )}
+            </div>
+
+            {/* 卡片内容 */}
+            <div className="p-4 text-gray-700">
+              {item.description}
+            </div>
+
+            {/* 行动步骤 (如果有) */}
+            {item.actionStep && (
+              <div className="mx-4 mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <div className="font-medium text-blue-800 mb-1 text-sm">行动步骤:</div>
+                <div className="text-blue-700 text-sm">
+                  {item.actionStep}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
-  )
+  );
 } 

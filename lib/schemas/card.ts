@@ -52,31 +52,11 @@ export const CardItemSchema = z.object({
 
 // 定义布局类型
 export const LayoutSchema = z.object({
-  type: z.enum([
-    "grid",
-    "list",
-    "masonry",
-    "carousel",
-    "timeline",
-    "tabs",
-    "accordion",
-    "education",
-    "finance"
-  ]).default("grid"),
-  columns: z.number().optional().default(2),
-  alignment: z.enum(["start", "center", "end"]).optional().default("start"),
-  spacing: z.enum(["none", "small", "medium", "large"]).optional().default("medium"),
-  itemStyle: z.enum(["card", "minimal", "bordered"]).optional().default("card"),
-  templateStyle: z.object({
-    headerBgColor: z.string().optional(),
-    bodyBgColor: z.string().optional(),
-    borderColor: z.string().optional(),
-    headerFont: z.string().optional(),
-    bodyFont: z.string().optional(),
-    numberBgColor: z.string().optional(),
-    dividerStyle: z.enum(["solid", "dashed", "dotted"]).optional(),
-    dotColor: z.string().optional()
-  }).optional()
+  type: z.enum(["grid", "list", "carousel"]),
+  columns: z.number().optional(),
+  alignment: z.enum(["left", "center", "right"]).optional(),
+  spacing: z.enum(["small", "medium", "large"]).optional(),
+  itemStyle: z.enum(["card", "bordered", "minimal"]).optional()
 })
 
 // 定义主题类型
