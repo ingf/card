@@ -8,6 +8,7 @@ interface CardProps {
   data: CardType;
   platformRatio?: string;
   posterFormat?: string;
+  hideNavigation?: boolean;
 }
 
 // 平台比例配置
@@ -278,7 +279,7 @@ const CarouselNavButton = ({
   );
 };
 
-export function Card({ data, platformRatio = "default", posterFormat = "standard" }: CardProps) {
+export function Card({ data, platformRatio = "default", posterFormat = "standard", hideNavigation = false }: CardProps) {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const slideRef = React.useRef<HTMLDivElement>(null);
 
@@ -403,10 +404,12 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
         )}
 
         {/* 平台比例指示器 */}
-        <div className="text-center mb-4 text-sm text-gray-500">
-          {platformRatio !== "default" ? `${platformRatio} 比例` : "默认比例"}
-          {posterFormat !== "standard" && ` - ${posterFormat === "simple" ? "简单海报" : "复杂海报"}`}
-        </div>
+        {!hideNavigation && (
+          <div className="text-center mb-4 text-sm text-gray-500">
+            {platformRatio !== "default" ? `${platformRatio} 比例` : "默认比例"}
+            {posterFormat !== "standard" && ` - ${posterFormat === "simple" ? "简单海报" : "复杂海报"}`}
+          </div>
+        )}
 
         {/* 手机框架容器 - 使用动态比例 */}
         <div
@@ -426,31 +429,33 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
             </div>
 
             {/* 指示器和导航 */}
-            <div className="flex justify-between items-center px-4 py-3 bg-white">
-              <div className="text-gray-500 text-sm">
-                {currentSlide + 1} / {data.items?.length || 1}
-              </div>
+            {!hideNavigation && (
+              <div className="flex justify-between items-center px-4 py-3 bg-white">
+                <div className="text-gray-500 text-sm">
+                  {currentSlide + 1} / {data.items?.length || 1}
+                </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={prevSlide}
-                  disabled={currentSlide === 0}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                  aria-label="上一张"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={prevSlide}
+                    disabled={currentSlide === 0}
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    aria-label="上一张"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
 
-                <button
-                  onClick={nextSlide}
-                  disabled={!data.items || currentSlide >= data.items.length - 1}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                  aria-label="下一张"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
+                  <button
+                    onClick={nextSlide}
+                    disabled={!data.items || currentSlide >= data.items.length - 1}
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    aria-label="下一张"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* 轮播内容 - 使用新的渲染函数 */}
             <div ref={slideRef} className="px-4 flex-grow overflow-y-auto" style={{ minHeight: "400px", height: "500px" }}>
@@ -469,16 +474,18 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
             </div>
 
             {/* 底部指示器点 */}
-            <div className="flex justify-center py-3 gap-1.5">
-              {data.items && data.items.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${currentSlide === index ? 'bg-blue-500 w-4' : 'bg-gray-300'}`}
-                  aria-label={`跳转到第 ${index + 1} 张`}
-                />
-              ))}
-            </div>
+            {!hideNavigation && (
+              <div className="flex justify-center py-3 gap-1.5">
+                {data.items && data.items.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${currentSlide === index ? 'bg-blue-500 w-4' : 'bg-gray-300'}`}
+                    aria-label={`跳转到第 ${index + 1} 张`}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* 手机底部导航栏 */}
             <div className="h-1.5 bg-gray-200 rounded-full mx-auto w-1/3 mb-3"></div>
