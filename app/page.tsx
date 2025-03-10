@@ -245,22 +245,34 @@ export default function Home() {
                               ...cardData,
                               layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
                             }}
-                            platformRatio="default"
+                            platformRatio="3:4"
                             posterFormat="standard"
                             hideNavigation={true}
                           />
+                          {/* 底部按钮栏 */}
+                          <div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
+                            <Link
+                              href={getDetailLink("standard")}
+                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
+                            >
+                              <span className="text-xs">编辑</span>
+                            </Link>
+                            <button
+                              onClick={() => alert('下载功能将在后续版本中实现')}
+                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
+                            >
+                              <span className="text-xs">下载</span>
+                            </button>
+                            <button
+                              onClick={() => alert('更多功能将在后续版本中实现')}
+                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              <span className="text-xs">⋮</span>
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
-                  <div className="p-2 bg-gray-50 border-t border-gray-100 flex justify-center">
-                    <Link
-                      href={getDetailLink("standard")}
-                      className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full flex items-center"
-                    >
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      使用此模板
-                    </Link>
                   </div>
                 </div>
 
@@ -293,22 +305,34 @@ export default function Home() {
                               ...cardData,
                               layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
                             }}
-                            platformRatio="default"
+                            platformRatio="3:4"
                             posterFormat="simple"
                             hideNavigation={true}
                           />
+                          {/* 底部按钮栏 */}
+                          <div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
+                            <Link
+                              href={getDetailLink("simple")}
+                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
+                            >
+                              <span className="text-xs">编辑</span>
+                            </Link>
+                            <button
+                              onClick={() => alert('下载功能将在后续版本中实现')}
+                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
+                            >
+                              <span className="text-xs">下载</span>
+                            </button>
+                            <button
+                              onClick={() => alert('更多功能将在后续版本中实现')}
+                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              <span className="text-xs">⋮</span>
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
-                  <div className="p-2 bg-gray-50 border-t border-gray-100 flex justify-center">
-                    <Link
-                      href={getDetailLink("simple")}
-                      className="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full flex items-center"
-                    >
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      使用此模板
-                    </Link>
                   </div>
                 </div>
 
@@ -341,22 +365,34 @@ export default function Home() {
                               ...cardData,
                               layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
                             }}
-                            platformRatio="default"
+                            platformRatio="3:4"
                             posterFormat="complex"
                             hideNavigation={true}
                           />
+                          {/* 底部按钮栏 */}
+                          <div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
+                            <Link
+                              href={getDetailLink("complex")}
+                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
+                            >
+                              <span className="text-xs">编辑</span>
+                            </Link>
+                            <button
+                              onClick={() => alert('下载功能将在后续版本中实现')}
+                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
+                            >
+                              <span className="text-xs">下载</span>
+                            </button>
+                            <button
+                              onClick={() => alert('更多功能将在后续版本中实现')}
+                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              <span className="text-xs">⋮</span>
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
-                  <div className="p-2 bg-gray-50 border-t border-gray-100 flex justify-center">
-                    <Link
-                      href={getDetailLink("complex")}
-                      className="text-xs bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-full flex items-center"
-                    >
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      使用此模板
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -465,27 +501,40 @@ export default function Home() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex-grow overflow-y-auto p-4 flex items-center justify-center">
-              <div className="w-full" style={{ maxWidth: "375px" }}>
+            <div className="flex-grow overflow-y-auto p-4 flex items-center justify-center bg-gray-100">
+              <div className="w-full max-w-[375px]">
                 <Card
                   data={{
                     ...cardData,
                     layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
                   }}
-                  platformRatio="9:16"
+                  platformRatio="3:4"
                   posterFormat={previewTemplate}
                   hideNavigation={false}
                 />
               </div>
             </div>
-            <div className="p-4 border-t border-gray-200 flex justify-end">
-              <Link
-                href={getDetailLink(previewTemplate)}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center"
-              >
-                <ExternalLink className="h-4 w-4 mr-1" />
-                使用此模板
-              </Link>
+            <div className="p-4 border-t border-gray-200">
+              <div className="w-full bg-white rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
+                <Link
+                  href={getDetailLink(previewTemplate)}
+                  className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
+                >
+                  <span className="text-sm">编辑</span>
+                </Link>
+                <button
+                  onClick={() => alert('下载功能将在后续版本中实现')}
+                  className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
+                >
+                  <span className="text-sm">下载</span>
+                </button>
+                <button
+                  onClick={() => alert('更多功能将在后续版本中实现')}
+                  className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <span className="text-sm">⋮</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

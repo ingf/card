@@ -110,7 +110,7 @@ export default function DetailPage() {
       </div>
 
       {/* 主内容区域 - 竖屏展示 */}
-      <div className="flex-grow flex flex-col items-center justify-center p-4 overflow-y-auto">
+      <div className="flex-grow flex flex-col items-center justify-center p-4 overflow-y-auto bg-gray-100">
         {isLoading ? (
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
@@ -120,8 +120,9 @@ export default function DetailPage() {
           <div className="max-w-md w-full mx-auto" style={{ maxHeight: "90vh" }}>
             <Card
               data={cardData}
-              platformRatio="9:16"
+              platformRatio="3:4"
               posterFormat={template as string}
+              hideNavigation={false}
             />
           </div>
         ) : (
@@ -136,13 +137,26 @@ export default function DetailPage() {
 
       {/* 底部操作栏 */}
       <div className="bg-white border-t border-gray-200 p-4 flex justify-center">
-        <button
-          className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center shadow-md"
-          onClick={() => alert('下载功能将在后续版本中实现')}
-        >
-          <Download className="h-5 w-5 mr-2" />
-          下载卡片
-        </button>
+        <div className="max-w-md w-full bg-white rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
+          <button
+            className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
+            onClick={() => alert('编辑功能将在后续版本中实现')}
+          >
+            <span className="text-sm">编辑</span>
+          </button>
+          <button
+            className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
+            onClick={() => alert('下载功能将在后续版本中实现')}
+          >
+            <span className="text-sm">下载</span>
+          </button>
+          <button
+            className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors"
+            onClick={() => alert('更多功能将在后续版本中实现')}
+          >
+            <span className="text-sm">⋮</span>
+          </button>
+        </div>
       </div>
     </main>
   );

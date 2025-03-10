@@ -69,9 +69,9 @@ const CardItem = ({ item, theme, layout }: {
     'glass': 'bg-white/70 backdrop-blur-md border border-white/20'
   };
 
-  // 数字标记位置
-  const numberPosition = layout?.itemStyle?.numberStyle?.position || 'center-left';
-  const numberShape = layout?.itemStyle?.numberStyle?.shape || 'circle';
+  // 简化数字标记处理
+  const showNumber = true; // 默认显示数字
+  const numberShape = 'circle'; // 默认圆形
 
   // 数字标记形状
   const numberShapeClasses = {
@@ -134,15 +134,8 @@ const CardItem = ({ item, theme, layout }: {
 
       <div className="p-6 relative">
         {/* 标题区域 */}
-        <div className={cn(
-          "flex items-center gap-4 mb-4",
-          {
-            'flex-row': numberPosition === 'center-left',
-            'flex-row-reverse': numberPosition === 'top-right',
-            'justify-between': numberPosition === 'top-right',
-          }
-        )}>
-          {layout?.itemStyle?.numberStyle?.show !== false && (
+        <div className="flex items-center gap-4 mb-4">
+          {showNumber && (
             <div
               className={cn(
                 "flex-shrink-0 w-10 h-10 flex items-center justify-center",
@@ -151,8 +144,6 @@ const CardItem = ({ item, theme, layout }: {
               style={{
                 backgroundColor: primaryColor,
                 color: 'white',
-                width: layout?.itemStyle?.numberStyle?.size ? `${layout.itemStyle.numberStyle.size}px` : undefined,
-                height: layout?.itemStyle?.numberStyle?.size ? `${layout.itemStyle.numberStyle.size}px` : undefined,
               }}
             >
               <span className="text-xl font-bold text-white">
@@ -279,9 +270,145 @@ const CarouselNavButton = ({
   );
 };
 
-export function Card({ data, platformRatio = "default", posterFormat = "standard", hideNavigation = false }: CardProps) {
+// 渲染卡片内容
+const renderCardContent = (item: CardItemType, index: number, data: CardType, posterFormat: string) => {
+  // 根据海报格式渲染不同内容
+  if (posterFormat === "simple") {
+    // 简单海报样式 - 类似图片中的效果
+    return (
+      <div className="flex flex-col h-full bg-amber-50/80 p-4 rounded-lg">
+        {/* 标题区域 */}
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-bold text-amber-800">{data.title}</h2>
+          <div className="inline-block px-3 py-1 bg-amber-500 text-white text-xs rounded-full mt-2">
+            关注健康
+          </div>
+        </div>
+
+        {/* 内容列表 */}
+        <div className="space-y-4 flex-grow">
+          {data.items.map((listItem, idx) => (
+            <div key={idx} className="flex items-start">
+              <div className="flex-shrink-0 bg-amber-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">
+                <span className="text-xs">{idx + 1}</span>
+              </div>
+              <div className="flex-grow">
+                <h3 className="text-sm font-bold text-amber-800">{listItem.title}</h3>
+                <p className="text-xs text-amber-700 mt-1">{listItem.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 行动步骤 */}
+        {item.actionStep && (
+          <div className="mt-4 bg-blue-50 p-3 rounded-lg border border-blue-100">
+            <div className="text-xs font-medium text-blue-800 mb-1">行动步骤:</div>
+            <div className="text-xs text-blue-700">
+              {item.actionStep}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  } else if (posterFormat === "complex") {
+    // 复杂海报样式
+    return (
+      <div className="flex flex-col h-full bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+        {/* 标题区域 */}
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">{data.title}</h2>
+          <div className="inline-block px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full mt-2">
+            关注健康
+          </div>
+        </div>
+
+        {/* 内容列表 */}
+        <div className="space-y-4 flex-grow">
+          {data.items.map((listItem, idx) => (
+            <div key={idx} className="flex items-start bg-white/70 p-3 rounded-lg shadow-sm">
+              <div className="flex-shrink-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-7 h-7 flex items-center justify-center mr-2">
+                <span className="text-xs">{idx + 1}</span>
+              </div>
+              <div className="flex-grow">
+                <h3 className="text-sm font-bold text-gray-800">{listItem.title}</h3>
+                <p className="text-xs text-gray-600 mt-1">{listItem.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 行动步骤 */}
+        {item.actionStep && (
+          <div className="mt-4 bg-white/70 p-3 rounded-lg shadow-sm border border-purple-100">
+            <div className="text-xs font-medium text-purple-800 mb-1">行动步骤:</div>
+            <div className="text-xs text-purple-700">
+              {item.actionStep}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  } else {
+    // 标准卡片样式 - 限制最多显示4个要点
+    const maxItems = 4;
+    const hasMoreItems = data.items.length > maxItems;
+
+    return (
+      <div className="flex flex-col h-full bg-blue-50/80 p-4 rounded-lg">
+        {/* 标题区域 */}
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-bold text-blue-800">{data.title}</h2>
+          <div className="inline-block px-3 py-1 bg-blue-500 text-white text-xs rounded-full mt-2">
+            关注健康
+          </div>
+        </div>
+
+        {/* 内容列表 - 最多显示4个 */}
+        <div className="space-y-4 flex-grow">
+          {data.items.slice(0, maxItems).map((listItem, idx) => (
+            <div key={idx} className="flex items-start">
+              <div className="flex-shrink-0 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">
+                <span className="text-xs">{idx + 1}</span>
+              </div>
+              <div className="flex-grow">
+                <h3 className="text-sm font-bold text-blue-800">{listItem.title}</h3>
+                <p className="text-xs text-blue-700 mt-1">{listItem.description}</p>
+              </div>
+            </div>
+          ))}
+
+          {/* 显示"查看更多"按钮 */}
+          {hasMoreItems && (
+            <div className="text-center mt-2">
+              <button
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+                onClick={() => alert(`还有${data.items.length - maxItems}个要点未显示，完整内容请查看详情`)}
+              >
+                查看更多 ({data.items.length - maxItems})
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 行动步骤 */}
+        {item.actionStep && (
+          <div className="mt-4 bg-white/70 p-3 rounded-lg border border-blue-100">
+            <div className="text-xs font-medium text-blue-800 mb-1">行动步骤:</div>
+            <div className="text-xs text-blue-700">
+              {item.actionStep}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+};
+
+export function Card({ data, platformRatio = "3:4", posterFormat = "standard", hideNavigation = false }: CardProps) {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const slideRef = React.useRef<HTMLDivElement>(null);
+  const [showButtons, setShowButtons] = React.useState(false);
 
   // 处理滑动到下一张卡片
   const nextSlide = () => {
@@ -301,133 +428,40 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
   // 当布局类型为 carousel 时使用纵向滑动布局
   const isCarousel = data.layout?.type === "carousel";
 
-  // 根据海报格式渲染不同内容
-  const renderCardContent = (item: CardItemType, index: number) => {
-    // 根据索引选择背景样式
-    const bgIndex = index % posterBackgrounds.simple.length;
-    const simpleBg = posterBackgrounds.simple[bgIndex];
-    const complexBg = posterBackgrounds.complex[bgIndex];
-
-    if (posterFormat === "simple") {
-      // 简单海报只显示标题和简短描述，添加艺术字体和背景
-      return (
-        <div className={`flex flex-col h-full ${simpleBg} p-6 rounded-xl`}>
-          <div className="bg-white text-blue-500 w-16 h-16 rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-6 shadow-md border-4 border-blue-100">
-            {index + 1}
-          </div>
-
-          <h3 className="text-2xl font-bold text-center mb-4 text-gray-800 font-serif tracking-wide">
-            {item.title}
-          </h3>
-
-          {/* 只显示描述的前1-2句，使用艺术字体，固定高度并添加溢出处理 */}
-          <div className="text-center text-lg text-gray-700 px-4 font-medium leading-relaxed h-32 overflow-y-auto">
-            {item.description.split('.')[0]}.
-            {item.description.split('.')[1] && `${item.description.split('.')[1]}.`}
-          </div>
-
-          {/* 添加装饰元素 */}
-          <div className="mt-6 flex justify-center">
-            <div className="h-1 w-16 bg-blue-300 rounded-full opacity-70"></div>
-          </div>
-        </div>
-      );
-    } else if (posterFormat === "complex") {
-      // 复杂海报显示完整内容，包括行动步骤，添加背景
-      return (
-        <div className={`flex flex-col h-full ${complexBg} p-6 rounded-xl`}>
-          <div className="flex items-center gap-4 mb-6">
-            <div className="bg-blue-500 text-white w-14 h-14 rounded-full flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow-md">
-              {index + 1}
-            </div>
-
-            <h3 className="text-2xl font-bold text-gray-800 font-serif">
-              {item.title}
-            </h3>
-          </div>
-
-          {/* 为描述内容添加固定高度和溢出处理 */}
-          <div className="text-gray-700 leading-relaxed mb-6 text-lg h-48 overflow-y-auto">
-            {item.description}
-          </div>
-
-          {item.actionStep && (
-            <div className="mt-auto bg-white/80 backdrop-blur-sm p-4 rounded-lg border border-blue-200 shadow-sm">
-              <div className="font-medium text-blue-800 mb-2">行动步骤:</div>
-              <div className="text-blue-700">
-                {item.actionStep}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    } else {
-      // 标准卡片格式 - 使用现有的渲染方式
-      return (
-        <div className="flex flex-col h-full">
-          <div className="flex items-center gap-3 p-4 border-b border-gray-100">
-            <div className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0">
-              {index + 1}
-            </div>
-
-            <h3 className="text-lg font-bold text-gray-800 line-clamp-1">
-              {item.title}
-            </h3>
-          </div>
-
-          {/* 为描述内容添加固定高度和溢出处理 */}
-          <div className="p-5 text-gray-700 leading-relaxed flex-grow overflow-y-auto text-base h-64">
-            {item.description}
-          </div>
-
-          {item.actionStep && (
-            <div className="mx-4 mb-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-              <div className="font-medium text-blue-800 mb-1 text-sm">行动步骤:</div>
-              <div className="text-blue-700 text-sm">
-                {item.actionStep}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-  };
-
   // 根据布局类型选择不同的渲染方式
   if (isCarousel) {
     return (
       <div className="w-full">
-        <h2 className="text-2xl font-bold text-center mb-6">{data.title}</h2>
-
-        {data.subtitle && (
-          <p className="text-gray-600 text-center mb-8">{data.subtitle}</p>
-        )}
-
-        {/* 平台比例指示器 */}
         {!hideNavigation && (
-          <div className="text-center mb-4 text-sm text-gray-500">
-            {platformRatio !== "default" ? `${platformRatio} 比例` : "默认比例"}
-            {posterFormat !== "standard" && ` - ${posterFormat === "simple" ? "简单海报" : "复杂海报"}`}
-          </div>
+          <>
+            <h2 className="text-2xl font-bold text-center mb-6">{data.title}</h2>
+            {data.subtitle && (
+              <p className="text-gray-600 text-center mb-8">{data.subtitle}</p>
+            )}
+            {/* 平台比例指示器 */}
+            <div className="text-center mb-4 text-sm text-gray-500">
+              {platformRatio !== "default" ? `${platformRatio} 比例` : "默认比例"}
+              {posterFormat !== "standard" && ` - ${posterFormat === "simple" ? "简单海报" : "复杂海报"}`}
+            </div>
+          </>
         )}
 
-        {/* 手机框架容器 - 使用动态比例 */}
+        {/* 内容容器 - 使用动态比例 */}
         <div
-          className={`mx-auto ${ratioConfig.class}`}
+          className={`mx-auto ${ratioConfig.class} relative group`}
           style={{
             maxWidth: ratioConfig.width,
             // 设置最小高度，确保卡片有足够的高度
             minHeight: platformRatio === "default" ? "600px" : "auto"
           }}
+          onMouseEnter={() => setShowButtons(true)}
+          onMouseLeave={() => setShowButtons(false)}
         >
-          {/* 手机框架 */}
-          <div className="bg-white rounded-[32px] shadow-xl border border-gray-200 overflow-hidden h-full flex flex-col relative">
-            {/* 手机顶部状态栏 */}
-            <div className="bg-gray-100 h-8 min-h-[32px] w-full flex items-center justify-between px-4 border-b border-gray-200">
-              <div className="w-16 h-2 bg-gray-300 rounded-full"></div>
-              <div className="w-4 h-2 bg-gray-300 rounded-full"></div>
-            </div>
-
+          {/* 内容区域 - 直接显示内容，不使用手机框架 */}
+          <div className={`overflow-hidden h-full flex flex-col relative rounded-xl ${posterFormat === "simple" ? "bg-amber-100 border-4 border-amber-200" :
+            posterFormat === "complex" ? "bg-gradient-to-br from-purple-100 to-pink-100 border-4 border-purple-200" :
+              "bg-blue-100 border-4 border-blue-200"
+            }`}>
             {/* 指示器和导航 */}
             {!hideNavigation && (
               <div className="flex justify-between items-center px-4 py-3 bg-white">
@@ -457,16 +491,13 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
               </div>
             )}
 
-            {/* 轮播内容 - 使用新的渲染函数 */}
-            <div ref={slideRef} className="px-4 flex-grow overflow-y-auto" style={{ minHeight: "400px", height: "500px" }}>
-              <div className="transition-all duration-300 ease-in-out h-full py-4">
+            {/* 轮播内容 */}
+            <div ref={slideRef} className="flex-grow overflow-y-auto">
+              <div className="transition-all duration-300 ease-in-out h-full">
                 {data.items && data.items[currentSlide] && (
                   <div className="w-full h-full">
-                    <div
-                      className={`overflow-hidden mb-4 h-full flex flex-col ${posterFormat === "standard" ? "bg-white rounded-xl" : ""
-                        }`}
-                    >
-                      {renderCardContent(data.items[currentSlide], currentSlide)}
+                    <div className="h-full flex flex-col">
+                      {renderCardContent(data.items[currentSlide], currentSlide, data, posterFormat)}
                     </div>
                   </div>
                 )}
@@ -487,8 +518,29 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
               </div>
             )}
 
-            {/* 手机底部导航栏 */}
-            <div className="h-1.5 bg-gray-200 rounded-full mx-auto w-1/3 mb-3"></div>
+            {/* 悬浮按钮 */}
+            <div
+              className={`absolute bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 flex justify-between items-center ${showButtons || hideNavigation ? 'opacity-100' : 'opacity-0'}`}
+            >
+              <button
+                className="flex-1 py-2 text-center text-white hover:bg-black/10 transition-colors"
+                onClick={() => alert('编辑功能将在后续版本中实现')}
+              >
+                <span className="text-xs">编辑</span>
+              </button>
+              <button
+                className="flex-1 py-2 text-center text-white hover:bg-black/10 transition-colors"
+                onClick={() => alert('下载功能将在后续版本中实现')}
+              >
+                <span className="text-xs">下载</span>
+              </button>
+              <button
+                className="flex-1 py-2 text-center text-white hover:bg-black/10 transition-colors"
+                onClick={() => alert('更多功能将在后续版本中实现')}
+              >
+                <span className="text-xs">⋮</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -515,36 +567,12 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
             'text-center'}
       `}>
         {data.items?.map((item, index) => (
-          <div
+          <CardItem
             key={index}
-            className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200"
-          >
-            {/* 卡片头部 */}
-            <div className="border-b border-gray-100 p-4 flex items-center gap-3">
-              <div className="bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold">{index + 1}</span>
-              </div>
-
-              {item.title && (
-                <h3 className="text-lg font-bold text-gray-800">{item.title}</h3>
-              )}
-            </div>
-
-            {/* 卡片内容 */}
-            <div className="p-4 text-gray-700">
-              {item.description}
-            </div>
-
-            {/* 行动步骤 (如果有) */}
-            {item.actionStep && (
-              <div className="mx-4 mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                <div className="font-medium text-blue-800 mb-1 text-sm">行动步骤:</div>
-                <div className="text-blue-700 text-sm">
-                  {item.actionStep}
-                </div>
-              </div>
-            )}
-          </div>
+            item={item}
+            theme={data.theme}
+            layout={data.layout}
+          />
         ))}
       </div>
     </div>
