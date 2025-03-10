@@ -319,8 +319,8 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
             {item.title}
           </h3>
 
-          {/* 只显示描述的前1-2句，使用艺术字体 */}
-          <div className="text-center text-lg text-gray-700 px-4 font-medium leading-relaxed">
+          {/* 只显示描述的前1-2句，使用艺术字体，固定高度并添加溢出处理 */}
+          <div className="text-center text-lg text-gray-700 px-4 font-medium leading-relaxed h-32 overflow-y-auto">
             {item.description.split('.')[0]}.
             {item.description.split('.')[1] && `${item.description.split('.')[1]}.`}
           </div>
@@ -345,7 +345,8 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
             </h3>
           </div>
 
-          <div className="text-gray-700 leading-relaxed mb-6 text-lg">
+          {/* 为描述内容添加固定高度和溢出处理 */}
+          <div className="text-gray-700 leading-relaxed mb-6 text-lg h-48 overflow-y-auto">
             {item.description}
           </div>
 
@@ -373,7 +374,8 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
             </h3>
           </div>
 
-          <div className="p-5 text-gray-700 leading-relaxed flex-grow overflow-y-auto text-base">
+          {/* 为描述内容添加固定高度和溢出处理 */}
+          <div className="p-5 text-gray-700 leading-relaxed flex-grow overflow-y-auto text-base h-64">
             {item.description}
           </div>
 
@@ -451,7 +453,7 @@ export function Card({ data, platformRatio = "default", posterFormat = "standard
             </div>
 
             {/* 轮播内容 - 使用新的渲染函数 */}
-            <div ref={slideRef} className="px-4 flex-grow overflow-y-auto" style={{ minHeight: "400px" }}>
+            <div ref={slideRef} className="px-4 flex-grow overflow-y-auto" style={{ minHeight: "400px", height: "500px" }}>
               <div className="transition-all duration-300 ease-in-out h-full py-4">
                 {data.items && data.items[currentSlide] && (
                   <div className="w-full h-full">
