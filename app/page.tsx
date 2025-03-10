@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/Card";
 // import { LayoutSwitcher } from "@/components/LayoutSwitcher"; // 注释掉
 import { CardSchema } from "@/lib/schemas/card";
 import type { Card as CardType, Layout } from "@/lib/schemas/card";
-import { Sparkles, Loader2, Send } from "lucide-react";
+import { Sparkles, Loader2, Send, Clock, Settings, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
@@ -18,6 +18,28 @@ export default function Home() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("default");
   const [selectedRatio, setSelectedRatio] = useState<string>("default");
   const [posterFormat, setPosterFormat] = useState<string>("standard");
+  // 添加输入历史记录状态
+  const [inputHistory, setInputHistory] = useState<string[]>([]);
+  const [showSettings, setShowSettings] = useState(false);
+
+  // 添加输入框引用，用于自动聚焦
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  // 添加内容区域引用，用于自动滚动到底部
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // 自动滚动到底部
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = contentRef.current.scrollHeight;
+    }
+  }, [cardData]);
+
+  // 自动聚焦输入框
+  useEffect(() => {
+    if (inputRef.current && !isLoading) {
+      inputRef.current.focus();
+    }
+  }, [isLoading, cardData]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +55,9 @@ export default function Home() {
     setIsLoading(true);
 
     try {
+      // 将当前输入添加到历史记录
+      setInputHistory(prev => [input, ...prev.slice(0, 9)]);
+
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
@@ -64,6 +89,8 @@ export default function Home() {
       // 设置卡片数据
       setCardData(validatedData);
       setError("");
+      // 清空输入框
+      setInput("");
     } catch (e) {
       console.error("Error:", e);
       setError("生成失败，请重试");
@@ -74,6 +101,14 @@ export default function Home() {
 
   // 移除布局切换相关函数
   // const switchCardLayout = (layoutType: Layout["type"]) => { ... }; // 注释掉
+
+  // 从历史记录中选择输入
+  const selectHistoryInput = (historyItem: string) => {
+    setInput(historyItem);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
 
   // 渲染卡片视图
   const renderCardWithLayout = () => {
@@ -125,14 +160,17 @@ export default function Home() {
       ratio: "16:9",
       icon: "👥"
     }
-  };
+  } as const;
+
+  // 定义平台配置类型
+  type PlatformConfigKey = keyof typeof platformConfigs;
 
   // 修改 handlePlatformChange 函数，移除布局切换逻辑
   const handlePlatformChange = (platform: string) => {
     setSelectedPlatform(platform);
 
     // 从平台配置中获取对应的比例
-    const config = platformConfigs[platform as keyof typeof platformConfigs] || platformConfigs.default;
+    const config = platformConfigs[platform as PlatformConfigKey] || platformConfigs.default;
     setSelectedRatio(config.ratio);
 
     // 如果已有卡片数据，保持轮播布局
@@ -155,176 +193,279 @@ export default function Home() {
     setPosterFormat(format);
   };
 
+  // 切换设置面板显示状态
+  const toggleSettings = () => {
+    setShowSettings(!showSettings);
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex flex-col">
-      <div className="flex-grow flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* 标题区域 */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center mb-4">
-            <Sparkles className="h-8 w-8 text-blue-500 mr-2" />
-            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-              AI 信息卡片生成器
-            </h1>
-          </div>
-          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-            输入任何主题，AI 将为您生成结构化的信息卡片，支持多种平台预览
-          </p>
+      {/* 标题区域 */}
+      <div className="text-center py-4 border-b border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm">
+        <div className="inline-flex items-center justify-center">
+          <Sparkles className="h-6 w-6 text-blue-500 mr-2" />
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+            AI 信息卡片生成器
+          </h1>
+        </div>
+      </div>
+
+      {/* 主内容区域 - 类似 Claude/Grok3 的布局 */}
+      <div className="flex-grow flex flex-col overflow-hidden">
+        {/* 聊天内容区域 */}
+        <div
+          ref={contentRef}
+          className="flex-grow overflow-y-auto px-4 py-6 space-y-6"
+        >
+          {/* 欢迎信息 */}
+          {!cardData && !isLoading && (
+            <div className="max-w-3xl mx-auto text-center py-8">
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-10 w-10 text-blue-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">AI 信息卡片生成器</h2>
+              <p className="text-gray-600 text-lg mb-6 max-w-xl mx-auto">
+                在下方输入任何主题，AI 将为您生成结构化的信息卡片
+              </p>
+              <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+                <div className="bg-blue-50 p-4 rounded-lg text-center">
+                  <div className="text-2xl mb-2">📝</div>
+                  <div className="text-sm text-gray-700">输入内容</div>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg text-center">
+                  <div className="text-2xl mb-2">✨</div>
+                  <div className="text-sm text-gray-700">AI 生成</div>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg text-center">
+                  <div className="text-2xl mb-2">🎨</div>
+                  <div className="text-sm text-gray-700">自定义样式</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 加载状态 */}
+          {isLoading && (
+            <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-6 border border-gray-100 flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                  <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+                </div>
+                <p className="text-gray-700">AI 正在生成信息卡片，请稍候...</p>
+              </div>
+            </div>
+          )}
+
+          {/* 生成的卡片内容 */}
+          {cardData && (
+            <div className="max-w-4xl mx-auto">
+              {/* 用户输入显示 */}
+              <div className="bg-blue-50 rounded-lg p-3 mb-4 border border-blue-100">
+                <div className="flex items-start">
+                  <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 mr-2">
+                    U
+                  </div>
+                  <div className="flex-grow">
+                    <p className="text-gray-800">{inputHistory[0]}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI 生成的卡片 */}
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-sm p-4 border border-gray-100">
+                <div className="flex items-start mb-3">
+                  <div className="w-7 h-7 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 mr-2">
+                    AI
+                  </div>
+                  <div className="flex-grow">
+                    <h3 className="text-lg font-bold text-gray-800 mb-1">{cardData.title}</h3>
+                    {cardData.subtitle && (
+                      <p className="text-gray-600 text-sm mb-2">{cardData.subtitle}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* 设置面板切换按钮 */}
+                <div className="mb-2">
+                  <button
+                    onClick={toggleSettings}
+                    className="flex items-center text-xs text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    <Settings className="h-3 w-3 mr-1" />
+                    <span>显示设置</span>
+                    {showSettings ? <ChevronUp className="h-3 w-3 ml-1" /> : <ChevronDown className="h-3 w-3 ml-1" />}
+                  </button>
+                </div>
+
+                {/* 设置面板 */}
+                {showSettings && (
+                  <div className="mb-3 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* 平台选择 */}
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-700 mb-1">选择平台预览</h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                          {Object.entries(platformConfigs).map(([key, config]) => (
+                            <button
+                              key={key}
+                              onClick={() => handlePlatformChange(key)}
+                              className={`flex items-center justify-between px-2 py-1 rounded-md transition-all text-xs ${selectedPlatform === key
+                                ? `${config.color} text-white`
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                }`}
+                            >
+                              <div className="flex items-center">
+                                <span className="mr-1 text-sm">{config.icon}</span>
+                                <span>{config.name}</span>
+                              </div>
+                              <div className="text-xs opacity-80">
+                                {config.ratio !== "default" && config.ratio}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 海报格式选择 */}
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-700 mb-1">选择海报格式</h4>
+                        <div className="flex flex-wrap gap-1">
+                          <button
+                            onClick={() => handlePosterFormatChange("standard")}
+                            className={`px-2 py-1 rounded-md transition-all text-xs ${posterFormat === "standard"
+                              ? "bg-blue-500 text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              }`}
+                          >
+                            <div className="flex items-center">
+                              <span className="mr-1">📄</span>
+                              <span>标准卡片</span>
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => handlePosterFormatChange("simple")}
+                            className={`px-2 py-1 rounded-md transition-all text-xs ${posterFormat === "simple"
+                              ? "bg-green-500 text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              }`}
+                          >
+                            <div className="flex items-center">
+                              <span className="mr-1">🪧</span>
+                              <span>简单海报</span>
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => handlePosterFormatChange("complex")}
+                            className={`px-2 py-1 rounded-md transition-all text-xs ${posterFormat === "complex"
+                              ? "bg-purple-500 text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              }`}
+                          >
+                            <div className="flex items-center">
+                              <span className="mr-1">🖼️</span>
+                              <span>复杂海报</span>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 平台预览提示 */}
+                {selectedPlatform !== "default" && (
+                  <div className="mb-2 p-1.5 bg-blue-50 text-blue-700 rounded-md text-xs flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <span>
+                      当前预览: <strong>{platformConfigs[selectedPlatform as PlatformConfigKey]?.name || "默认"}</strong>
+                      {selectedRatio !== "default" && <span className="ml-1">({selectedRatio})</span>}
+                    </span>
+                  </div>
+                )}
+
+                {/* 渲染卡片 */}
+                <div className="mx-auto transition-all duration-300 flex items-center justify-center py-4">
+                  {renderCardWithLayout()}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 错误提示 */}
+          {error && (
+            <div className="max-w-3xl mx-auto p-3 text-red-500 bg-red-50 rounded-xl border border-red-200 animate-fade-in shadow-sm">
+              <div className="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* 输入表单 */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
-          <form onSubmit={handleFormSubmit} className="space-y-6">
-            <div className="relative">
+        {/* 底部输入区域 */}
+        <div className="border-t border-gray-200 bg-white/90 backdrop-blur-sm p-4">
+          <div className="max-w-3xl mx-auto">
+            <form onSubmit={handleFormSubmit} className="relative">
               <textarea
-                className="w-full h-36 p-5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white/50 backdrop-blur-sm transition-all"
+                ref={inputRef}
+                className="w-full p-3 pr-16 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white/50 backdrop-blur-sm transition-all resize-none"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="请输入您想要生成的信息卡片内容，例如：'如何建立自律习惯'、'健康饮食的五个关键点'..."
+                placeholder="输入您想要生成的信息卡片内容，例如：'如何建立自律习惯'、'健康饮食的五个关键点'..."
                 disabled={isLoading}
+                rows={2}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (input.trim()) {
+                      handleFormSubmit(e);
+                    }
+                  }
+                }}
               />
-              {input.length > 0 && !isLoading && (
-                <span className="absolute right-4 bottom-4 text-xs text-gray-400">
-                  {input.length} 个字符
-                </span>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="w-full px-6 py-4 text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl hover:from-blue-600 hover:to-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 font-medium"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
+              <button
+                type="submit"
+                className="absolute right-2 bottom-2 px-3 py-2 text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:from-blue-600 hover:to-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
+                disabled={isLoading || !input.trim()}
+              >
+                {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>AI 正在生成中...</span>
-                </>
-              ) : (
-                <>
+                ) : (
                   <Send className="h-5 w-5" />
-                  <span>生成卡片</span>
-                </>
-              )}
-            </button>
-          </form>
+                )}
+              </button>
+            </form>
+
+            {/* 历史记录快捷访问 */}
+            {inputHistory.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {inputHistory.slice(0, 3).map((item, index) => (
+                  <button
+                    key={index}
+                    onClick={() => selectHistoryInput(item)}
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition-colors truncate max-w-xs"
+                  >
+                    <Clock className="h-3 w-3 inline mr-1" />
+                    {item.length > 30 ? item.substring(0, 30) + "..." : item}
+                  </button>
+                ))}
+                {inputHistory.length > 3 && (
+                  <button className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition-colors">
+                    +{inputHistory.length - 3} 更多
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-
-        {/* 错误提示 */}
-        {error && (
-          <div className="p-4 text-red-500 bg-red-50 rounded-xl border border-red-200 mb-8 animate-fade-in shadow-sm">
-            <div className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              {error}
-            </div>
-          </div>
-        )}
-
-        {/* 卡片展示 */}
-        {cardData && (
-          <div className="space-y-6 animate-fade-in flex-grow flex flex-col">
-            {/* 平台选择器 */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 border border-gray-100">
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">选择平台预览</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {Object.entries(platformConfigs).map(([key, config]) => (
-                    <button
-                      key={key}
-                      onClick={() => handlePlatformChange(key)}
-                      className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${selectedPlatform === key
-                        ? `${config.color} text-white`
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                    >
-                      <div className="flex items-center">
-                        <span className="mr-2 text-lg">{config.icon}</span>
-                        <span>{config.name}</span>
-                      </div>
-                      <div className="text-xs opacity-80">
-                        {config.ratio !== "default" && config.ratio}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 海报格式选择器 */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 border border-gray-100 mt-4">
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">选择海报格式</h3>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={() => handlePosterFormatChange("standard")}
-                    className={`px-3 py-2 rounded-lg transition-all ${posterFormat === "standard"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    <div className="flex items-center">
-                      <span className="mr-2">📄</span>
-                      <span>标准卡片</span>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handlePosterFormatChange("simple")}
-                    className={`px-3 py-2 rounded-lg transition-all ${posterFormat === "simple"
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    <div className="flex items-center">
-                      <span className="mr-2">🪧</span>
-                      <span>简单海报</span>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handlePosterFormatChange("complex")}
-                    className={`px-3 py-2 rounded-lg transition-all ${posterFormat === "complex"
-                        ? "bg-purple-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    <div className="flex items-center">
-                      <span className="mr-2">🖼️</span>
-                      <span>复杂海报</span>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* 卡片内容 */}
-            <div
-              className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 transition-all duration-300 flex-grow border border-gray-100 overflow-hidden"
-              style={{ minHeight: "700px" }}
-            >
-              {/* 平台预览提示 */}
-              {selectedPlatform !== "default" && (
-                <div className="mb-4 p-2 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                  <span>
-                    当前预览适配于: <strong>{platformConfigs[selectedPlatform]?.name || "默认"}</strong>
-                    {selectedRatio !== "default" && <span className="ml-1">({selectedRatio})</span>}
-                  </span>
-                </div>
-              )}
-
-              {/* 渲染卡片 */}
-              <div className="mx-auto transition-all duration-300 flex items-center justify-center" style={{ minHeight: "600px" }}>
-                {renderCardWithLayout()}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* 页脚 */}
-      <footer className="w-full py-4 text-center text-gray-500 text-sm">
+      <footer className="w-full py-2 text-center text-gray-500 text-sm">
         <p>AI 信息卡片生成器 © {new Date().getFullYear()}</p>
       </footer>
     </main>
