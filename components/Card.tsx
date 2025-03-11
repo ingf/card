@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 import { useState, useCallback, useEffect } from 'react'
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import CardFactory from "./cards/CardFactory";
 
 interface CardProps {
   data: CardType;
@@ -405,176 +406,20 @@ const renderCardContent = (item: CardItemType, index: number, data: CardType, po
   }
 };
 
-export function Card({ data, platformRatio = "3:4", posterFormat = "standard", hideNavigation = false }: CardProps) {
-  const [currentSlide, setCurrentSlide] = React.useState(0);
-  const slideRef = React.useRef<HTMLDivElement>(null);
-  const [showButtons, setShowButtons] = React.useState(false);
-
-  // 处理滑动到下一张卡片
-  const nextSlide = () => {
-    if (!data.items || currentSlide >= data.items.length - 1) return;
-    setCurrentSlide(prev => prev + 1);
-  };
-
-  // 处理滑动到上一张卡片
-  const prevSlide = () => {
-    if (currentSlide <= 0) return;
-    setCurrentSlide(prev => prev - 1);
-  };
-
-  // 获取当前平台的比例配置
-  const ratioConfig = platformRatios[platformRatio as keyof typeof platformRatios] || platformRatios.default;
-
-  // 当布局类型为 carousel 时使用纵向滑动布局
-  const isCarousel = data.layout?.type === "carousel";
-
-  // 根据布局类型选择不同的渲染方式
-  if (isCarousel) {
-    return (
-      <div className="w-full">
-        {!hideNavigation && (
-          <>
-            <h2 className="text-2xl font-bold text-center mb-6">{data.title}</h2>
-            {data.subtitle && (
-              <p className="text-gray-600 text-center mb-8">{data.subtitle}</p>
-            )}
-            {/* 平台比例指示器 */}
-            <div className="text-center mb-4 text-sm text-gray-500">
-              {platformRatio !== "default" ? `${platformRatio} 比例` : "默认比例"}
-              {posterFormat !== "standard" && ` - ${posterFormat === "simple" ? "简单海报" : "复杂海报"}`}
-            </div>
-          </>
-        )}
-
-        {/* 内容容器 - 使用动态比例 */}
-        <div
-          className={`mx-auto ${ratioConfig.class} relative group`}
-          style={{
-            maxWidth: ratioConfig.width,
-            // 设置最小高度，确保卡片有足够的高度
-            minHeight: platformRatio === "default" ? "600px" : "auto"
-          }}
-          onMouseEnter={() => setShowButtons(true)}
-          onMouseLeave={() => setShowButtons(false)}
-        >
-          {/* 内容区域 - 直接显示内容，不使用手机框架 */}
-          <div className={`overflow-hidden h-full flex flex-col relative rounded-xl ${posterFormat === "simple" ? "bg-amber-100 border-4 border-amber-200" :
-            posterFormat === "complex" ? "bg-gradient-to-br from-purple-100 to-pink-100 border-4 border-purple-200" :
-              "bg-blue-100 border-4 border-blue-200"
-            }`}>
-            {/* 指示器和导航 */}
-            {!hideNavigation && (
-              <div className="flex justify-between items-center px-4 py-3 bg-white">
-                <div className="text-gray-500 text-sm">
-                  {currentSlide + 1} / {data.items?.length || 1}
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={prevSlide}
-                    disabled={currentSlide === 0}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                    aria-label="上一张"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-
-                  <button
-                    onClick={nextSlide}
-                    disabled={!data.items || currentSlide >= data.items.length - 1}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                    aria-label="下一张"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* 轮播内容 */}
-            <div ref={slideRef} className="flex-grow overflow-y-auto">
-              <div className="transition-all duration-300 ease-in-out h-full">
-                {data.items && data.items[currentSlide] && (
-                  <div className="w-full h-full">
-                    <div className="h-full flex flex-col">
-                      {renderCardContent(data.items[currentSlide], currentSlide, data, posterFormat)}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 底部指示器点 */}
-            {!hideNavigation && (
-              <div className="flex justify-center py-3 gap-1.5">
-                {data.items && data.items.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-all ${currentSlide === index ? 'bg-blue-500 w-4' : 'bg-gray-300'}`}
-                    aria-label={`跳转到第 ${index + 1} 张`}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* 悬浮按钮 */}
-            <div
-              className={`absolute bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 flex justify-between items-center ${showButtons || hideNavigation ? 'opacity-100' : 'opacity-0'}`}
-            >
-              <button
-                className="flex-1 py-2 text-center text-white hover:bg-black/10 transition-colors"
-                onClick={() => alert('编辑功能将在后续版本中实现')}
-              >
-                <span className="text-xs">编辑</span>
-              </button>
-              <button
-                className="flex-1 py-2 text-center text-white hover:bg-black/10 transition-colors"
-                onClick={() => alert('下载功能将在后续版本中实现')}
-              >
-                <span className="text-xs">下载</span>
-              </button>
-              <button
-                className="flex-1 py-2 text-center text-white hover:bg-black/10 transition-colors"
-                onClick={() => alert('更多功能将在后续版本中实现')}
-              >
-                <span className="text-xs">⋮</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 默认网格布局 - 修改文字颜色为黑色
+export function Card({ 
+  data, 
+  platformRatio = "3:4", 
+  posterFormat = "standard",
+  hideNavigation = false 
+}: CardProps) {
   return (
-    <div className="w-full">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">{data.title}</h2>
-
-      {data.subtitle && (
-        <p className="text-gray-600 text-center mb-8">{data.subtitle}</p>
-      )}
-
-      {/* 网格布局 */}
-      <div className={`
-        grid gap-6
-        ${data.layout?.columns === 1 ? 'grid-cols-1' :
-          data.layout?.columns === 2 ? 'grid-cols-1 md:grid-cols-2' :
-            'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}
-        ${data.layout?.alignment === 'left' ? 'text-left' :
-          data.layout?.alignment === 'right' ? 'text-right' :
-            'text-center'}
-      `}>
-        {data.items?.map((item, index) => (
-          <CardItem
-            key={index}
-            item={item}
-            theme={data.theme}
-            layout={data.layout}
-          />
-        ))}
-      </div>
+    <div className="card-container" style={{ aspectRatio: platformRatio }}>
+      <CardFactory 
+        data={data} 
+        platformRatio={platformRatio} 
+        posterFormat={posterFormat}
+        hideNavigation={hideNavigation}
+      />
     </div>
   );
 } 

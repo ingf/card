@@ -4,19 +4,17 @@ import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/Card";
 import { CardSchema } from "@/lib/schemas/card";
 import type { Card as CardType, Layout } from "@/lib/schemas/card";
-import { Sparkles, Loader2, Send, Clock, Download, Eye, ExternalLink, X } from "lucide-react";
+import { Sparkles, Loader2, Send, Clock, Download, Eye, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { getCardByKeyword } from "@/lib/mockData";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
   const [cardData, setCardData] = useState<CardType | null>(null);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [posterFormat, setPosterFormat] = useState<string>("standard");
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("simple-1");
   const [inputHistory, setInputHistory] = useState<string[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("standard");
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewTemplate, setPreviewTemplate] = useState<string>("standard");
 
   // 添加输入框引用，用于自动聚焦
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -42,40 +40,14 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      // 将当前输入添加到历史记录
-      setInputHistory(prev => [input, ...prev.slice(0, 9)]);
-
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt: input }),
-      });
-
-      if (!response.ok) {
-        throw new Error("请求失败");
-      }
-
-      const data = await response.json();
-      console.log("API Response:", data);
-
-      // 使用 Zod schema 验证
-      const validatedData = CardSchema.parse(data);
-      console.log("Validated data:", validatedData);
-
-      // 默认设置为轮播布局
-      validatedData.layout = {
-        type: "carousel",
-        columns: 1,
-        alignment: "center",
-        spacing: "medium",
-        itemStyle: "card"
-      };
+      // 使用模拟数据
+      const data = getCardByKeyword(input);
 
       // 设置卡片数据
-      setCardData(validatedData);
+      setCardData(data);
       setError("");
+      // 添加到历史记录
+      setInputHistory(prev => [input, ...prev]);
       // 清空输入框
       setInput("");
     } catch (e) {
@@ -94,31 +66,9 @@ export default function Home() {
     }
   };
 
-  // 添加海报格式选择函数
-  const handlePosterFormatChange = (format: string) => {
-    setPosterFormat(format);
-    setSelectedTemplate(format);
-  };
-
-  // 添加选择模板的处理函数
-  const handleTemplateSelect = (template: string, format?: string) => {
+  // 选择模板
+  const handleTemplateSelect = (template: string) => {
     setSelectedTemplate(template);
-
-    // 如果提供了格式，则更新格式
-    if (format) {
-      handlePosterFormatChange(format);
-    }
-  };
-
-  // 打开预览弹窗
-  const openPreview = (template: string) => {
-    setPreviewTemplate(template);
-    setShowPreview(true);
-  };
-
-  // 关闭预览弹窗
-  const closePreview = () => {
-    setShowPreview(false);
   };
 
   // 生成详情页链接
@@ -128,10 +78,11 @@ export default function Home() {
   };
 
   // 模板配置
-  const templateConfigs = [
-    { id: "standard", name: "标准卡片", color: "bg-blue-500", textColor: "text-blue-700", bgColor: "bg-blue-50", borderColor: "border-blue-200" },
-    { id: "simple", name: "简单海报", color: "bg-green-500", textColor: "text-green-700", bgColor: "bg-green-50", borderColor: "border-green-200" },
-    { id: "complex", name: "复杂海报", color: "bg-purple-500", textColor: "text-purple-700", bgColor: "bg-purple-50", borderColor: "border-purple-200" }
+  const templates = [
+    { id: "simple-1", name: "标准卡片" },
+    { id: "simple-2", name: "大字封面" },
+    { id: "simple-3", name: "AI拼图blog" },
+    { id: "simple-4", name: "运营必知" }
   ];
 
   return (
@@ -146,7 +97,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 主内容区域 - 类似 Claude/Grok3 的布局 */}
+      {/* 主内容区域 */}
       <div className="flex-grow flex flex-col overflow-hidden">
         {/* 聊天内容区域 */}
         <div
@@ -163,20 +114,6 @@ export default function Home() {
               <p className="text-gray-600 text-lg mb-6 max-w-xl mx-auto">
                 在下方输入任何主题，AI 将为您生成结构化的信息卡片
               </p>
-              <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                  <div className="text-2xl mb-2">📝</div>
-                  <div className="text-sm text-gray-700">输入内容</div>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                  <div className="text-2xl mb-2">✨</div>
-                  <div className="text-sm text-gray-700">AI 生成</div>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                  <div className="text-2xl mb-2">🎨</div>
-                  <div className="text-sm text-gray-700">自定义样式</div>
-                </div>
-              </div>
             </div>
           )}
 
@@ -202,7 +139,7 @@ export default function Home() {
                     U
                   </div>
                   <div className="flex-grow">
-                    <p className="text-gray-800">{inputHistory[0]}</p>
+                    <p className="text-gray-800">{inputHistory[0] || input}</p>
                   </div>
                 </div>
               </div>
@@ -222,73 +159,70 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 模板选择 Tabs */}
+              {/* 模板选择 */}
               <div className="mb-4">
-                <div className="flex space-x-2 mb-4">
-                  {templateConfigs.map((template) => (
-                    <button
-                      key={template.id}
-                      onClick={() => handleTemplateSelect(template.id, template.id)}
-                      className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${selectedTemplate === template.id
-                          ? `${template.color} text-white shadow-md`
-                          : `${template.bgColor} ${template.textColor} hover:bg-gray-100 border border-gray-200`
-                        }`}
-                    >
-                      {template.name}
-                      {selectedTemplate === template.id && (
-                        <span className="ml-2 text-xs bg-white/20 px-1.5 py-0.5 rounded-full">已选择</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-
-                {/* 卡片内容区域 */}
+                {/* 模板选择器 */}
                 <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-                  {/* 预览和操作按钮 */}
-                  <div className="flex justify-between items-center p-3 bg-gray-50 border-b border-gray-200">
-                    <div className="flex space-x-2">
+                  {/* 模板选择标签 */}
+                  <div className="p-3 bg-gray-50 border-b border-gray-200 flex overflow-x-auto">
+                    {templates.map((template) => (
                       <button
-                        onClick={() => openPreview(selectedTemplate)}
-                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full flex items-center"
+                        key={template.id}
+                        onClick={() => handleTemplateSelect(template.id)}
+                        className={`px-4 py-2 mx-1 text-sm rounded-lg transition-all ${selectedTemplate === template.id
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
                       >
-                        <Eye className="h-3 w-3 mr-1" />
-                        预览
+                        {template.name}
                       </button>
-                      <Link
-                        href={getDetailLink(selectedTemplate)}
-                        className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full flex items-center"
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        使用此模板
-                      </Link>
-                    </div>
-                    <button
-                      onClick={() => alert('下载功能将在后续版本中实现')}
-                      className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full flex items-center"
-                    >
-                      <Download className="h-3 w-3 mr-1" />
-                      下载
-                    </button>
+                    ))}
                   </div>
 
-                  {/* 卡片内容 */}
-                  <div className="p-4 flex justify-center items-center" style={{ minHeight: "500px" }}>
-                    {cardData && (
-                      <div className="transform origin-center">
-                        <Card
-                          data={{
-                            ...cardData,
-                            layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
-                          }}
-                          platformRatio="3:4"
-                          posterFormat={selectedTemplate}
-                          hideNavigation={true}
-                        />
-                      </div>
-                    )}
-                  </div>
+                  {/* 卡片预览 */}
+
                 </div>
               </div>
+
+              <div className="p-4 flex justify-center items-center" style={{ minHeight: "500px" }}>
+                {cardData && (
+                  <div className="flex justify-center">
+                    <div className="transform origin-center relative group">
+                      {/* 悬停时显示的背景和按钮 */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center z-10">
+                        <div className="flex gap-3">
+                          <Link
+                            href={`/preview?template=${selectedTemplate}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}`}
+                            className="bg-white hover:bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center transition-colors"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            预览
+                          </Link>
+                          <Link
+                            href={getDetailLink(selectedTemplate)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            使用
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* 移除原来的单独按钮 */}
+                      <Card
+                        data={{
+                          ...cardData,
+                          layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
+                        }}
+                        platformRatio="3:4"
+                        posterFormat={selectedTemplate}
+                        hideNavigation={true}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </div>
           )}
 
@@ -362,62 +296,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      {/* 预览弹窗 */}
-      {showPreview && cardData && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] flex flex-col">
-            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="font-bold text-lg">
-                {previewTemplate === "standard" && "标准卡片预览"}
-                {previewTemplate === "simple" && "简单海报预览"}
-                {previewTemplate === "complex" && "复杂海报预览"}
-              </h3>
-              <button
-                onClick={closePreview}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="flex-grow overflow-y-auto p-4 flex items-center justify-center bg-gray-100">
-              <div className="w-full max-w-[375px]">
-                <Card
-                  data={{
-                    ...cardData,
-                    layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
-                  }}
-                  platformRatio="3:4"
-                  posterFormat={previewTemplate}
-                  hideNavigation={false}
-                />
-              </div>
-            </div>
-            <div className="p-4 border-t border-gray-200">
-              <div className="w-full bg-white rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
-                <Link
-                  href={getDetailLink(previewTemplate)}
-                  className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
-                >
-                  <span className="text-sm">编辑</span>
-                </Link>
-                <button
-                  onClick={() => alert('下载功能将在后续版本中实现')}
-                  className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
-                >
-                  <span className="text-sm">下载</span>
-                </button>
-                <button
-                  onClick={() => alert('更多功能将在后续版本中实现')}
-                  className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-sm">⋮</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 页脚 */}
       <footer className="w-full py-2 text-center text-gray-500 text-xs">
