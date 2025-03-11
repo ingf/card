@@ -3,7 +3,8 @@ import { cn } from '@/lib/utils'
 import { useState, useCallback, useEffect } from 'react'
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import CardFactory from "./cards/CardFactory";
+import CardFactory from "./cards/CardFactory1";
+import { getTemplateById } from '@/lib/mockData';
 
 interface CardProps {
   data: CardType;
@@ -241,171 +242,6 @@ const CardItem = ({ item, theme, layout }: {
   );
 };
 
-// 轮播导航按钮组件
-const CarouselNavButton = ({
-  direction,
-  onClick,
-  color
-}: {
-  direction: 'prev' | 'next',
-  onClick: () => void,
-  color: string
-}) => {
-  return (
-    <button
-      onClick={onClick}
-      className="absolute top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md z-10 hover:bg-gray-50 transition-all"
-      style={{ [direction === 'prev' ? 'left' : 'right']: '8px' }}
-      aria-label={direction === 'prev' ? '上一个' : '下一个'}
-    >
-      {direction === 'prev' ? (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15 19L8 12L15 5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ) : (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9 5L16 12L9 19" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )}
-    </button>
-  );
-};
-
-// 渲染卡片内容
-const renderCardContent = (item: CardItemType, index: number, data: CardType, posterFormat: string) => {
-  // 根据海报格式渲染不同内容
-  if (posterFormat === "simple") {
-    // 简单海报样式 - 类似图片中的效果
-    return (
-      <div className="flex flex-col h-full bg-amber-50/80 p-4 rounded-lg">
-        {/* 标题区域 */}
-        <div className="text-center mb-4">
-          <h2 className="text-xl font-bold text-amber-800">{data.title}</h2>
-          <div className="inline-block px-3 py-1 bg-amber-500 text-white text-xs rounded-full mt-2">
-            关注健康
-          </div>
-        </div>
-
-        {/* 内容列表 */}
-        <div className="space-y-4 flex-grow">
-          {data.items.map((listItem, idx) => (
-            <div key={idx} className="flex items-start">
-              <div className="flex-shrink-0 bg-amber-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">
-                <span className="text-xs">{idx + 1}</span>
-              </div>
-              <div className="flex-grow">
-                <h3 className="text-sm font-bold text-amber-800">{listItem.title}</h3>
-                <p className="text-xs text-amber-700 mt-1">{listItem.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* 行动步骤 */}
-        {item.actionStep && (
-          <div className="mt-4 bg-blue-50 p-3 rounded-lg border border-blue-100">
-            <div className="text-xs font-medium text-blue-800 mb-1">行动步骤:</div>
-            <div className="text-xs text-blue-700">
-              {item.actionStep}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  } else if (posterFormat === "complex") {
-    // 复杂海报样式
-    return (
-      <div className="flex flex-col h-full bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
-        {/* 标题区域 */}
-        <div className="text-center mb-4">
-          <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">{data.title}</h2>
-          <div className="inline-block px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full mt-2">
-            关注健康
-          </div>
-        </div>
-
-        {/* 内容列表 */}
-        <div className="space-y-4 flex-grow">
-          {data.items.map((listItem, idx) => (
-            <div key={idx} className="flex items-start bg-white/70 p-3 rounded-lg shadow-sm">
-              <div className="flex-shrink-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-7 h-7 flex items-center justify-center mr-2">
-                <span className="text-xs">{idx + 1}</span>
-              </div>
-              <div className="flex-grow">
-                <h3 className="text-sm font-bold text-gray-800">{listItem.title}</h3>
-                <p className="text-xs text-gray-600 mt-1">{listItem.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* 行动步骤 */}
-        {item.actionStep && (
-          <div className="mt-4 bg-white/70 p-3 rounded-lg shadow-sm border border-purple-100">
-            <div className="text-xs font-medium text-purple-800 mb-1">行动步骤:</div>
-            <div className="text-xs text-purple-700">
-              {item.actionStep}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  } else {
-    // 标准卡片样式 - 限制最多显示4个要点
-    const maxItems = 4;
-    const hasMoreItems = data.items.length > maxItems;
-
-    return (
-      <div className="flex flex-col h-full bg-blue-50/80 p-4 rounded-lg">
-        {/* 标题区域 */}
-        <div className="text-center mb-4">
-          <h2 className="text-xl font-bold text-blue-800">{data.title}</h2>
-          <div className="inline-block px-3 py-1 bg-blue-500 text-white text-xs rounded-full mt-2">
-            关注健康
-          </div>
-        </div>
-
-        {/* 内容列表 - 最多显示4个 */}
-        <div className="space-y-4 flex-grow">
-          {data.items.slice(0, maxItems).map((listItem, idx) => (
-            <div key={idx} className="flex items-start">
-              <div className="flex-shrink-0 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">
-                <span className="text-xs">{idx + 1}</span>
-              </div>
-              <div className="flex-grow">
-                <h3 className="text-sm font-bold text-blue-800">{listItem.title}</h3>
-                <p className="text-xs text-blue-700 mt-1">{listItem.description}</p>
-              </div>
-            </div>
-          ))}
-
-          {/* 显示"查看更多"按钮 */}
-          {hasMoreItems && (
-            <div className="text-center mt-2">
-              <button
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
-                onClick={() => alert(`还有${data.items.length - maxItems}个要点未显示，完整内容请查看详情`)}
-              >
-                查看更多 ({data.items.length - maxItems})
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* 行动步骤 */}
-        {item.actionStep && (
-          <div className="mt-4 bg-white/70 p-3 rounded-lg border border-blue-100">
-            <div className="text-xs font-medium text-blue-800 mb-1">行动步骤:</div>
-            <div className="text-xs text-blue-700">
-              {item.actionStep}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-};
-
 // 根据卡片类型渲染不同的布局
 const renderCardByType = (data: CardType, currentIndex: number, posterFormat: string) => {
   const currentItem = data.items[currentIndex];
@@ -415,14 +251,14 @@ const renderCardByType = (data: CardType, currentIndex: number, posterFormat: st
       return renderListCard(data, currentItem, currentIndex, posterFormat);
     case "steps":
       return renderStepsCard(data, currentItem, currentIndex, posterFormat);
-    case "comparison":
-      return renderComparisonCard(data, currentItem, currentIndex, posterFormat);
-    case "faq":
-      return renderFaqCard(data, currentItem, currentIndex, posterFormat);
-    case "timeline":
-      return renderTimelineCard(data, currentItem, currentIndex, posterFormat);
-    default:
-      return renderDefaultCard(data, currentItem, currentIndex, posterFormat);
+    // case "comparison":
+    //   return renderComparisonCard(data, currentItem, currentIndex, posterFormat);
+    // case "faq":
+    //   return renderFaqCard(data, currentItem, currentIndex, posterFormat);
+    // case "timeline":
+    //   return renderTimelineCard(data, currentItem, currentIndex, posterFormat);
+    // default:
+    //   return renderDefaultCard(data, currentItem, currentIndex, posterFormat);
   }
 };
 
@@ -489,7 +325,7 @@ const renderListCard = (data: CardType, item: CardItemType, index: number, poste
               {item.bulletPoints.map((point, idx) => (
                 <li key={idx} className="flex items-start gap-2 text-sm">
                   <span style={{ color: accentColor }}>•</span>
-                  <span>{point}</span>
+                  <span style={{ color: theme?.textColor || '#212121' }}>{point}</span>
                 </li>
               ))}
             </ul>
@@ -503,7 +339,7 @@ const renderListCard = (data: CardType, item: CardItemType, index: number, poste
             borderLeft: `3px solid ${accentColor}`
           }}>
             <div className="text-xs font-medium mb-1" style={{ color: accentColor }}>行动步骤</div>
-            <p className="text-sm">{item.actionStep}</p>
+            <p className="text-sm" style={{ color: theme?.textColor || '#212121' }}>{item.actionStep}</p>
           </div>
         )}
       </div>
@@ -586,7 +422,7 @@ const renderStepsCard = (data: CardType, item: CardItemType, index: number, post
 
 // 其他类型的卡片布局...
 
-export function Card({ data, width = 375, height = 500, platformRatio = "default", posterFormat = "default", hideNavigation = false, className = "" }: CardProps & { width?: number, height?: number, className?: string }) {
+export function Card({ data, width = 375, height = 500, platformRatio = "default", posterFormat = "standard", hideNavigation = false, className = "" }: CardProps & { width?: number, height?: number, className?: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const totalItems = data.items.length;
 
@@ -612,25 +448,26 @@ export function Card({ data, width = 375, height = 500, platformRatio = "default
       style={{
         width: width ? `${width}px` : ratio.width,
         height: height ? `${height}px` : ratio.height,
+        boxShadow: getTemplateById(posterFormat).style.boxShadow
       }}
     >
-      {/* 根据卡片类型渲染不同布局 */}
+      {/* 根据模板样式渲染不同布局 */}
       {renderCardByType(data, currentIndex, posterFormat)}
 
-      {/* 导航按钮 */}
+      {/* 导航按钮 - 根据模板样式调整 */}
       {!hideNavigation && totalItems > 1 && (
         <div className="absolute bottom-4 right-4 flex gap-2">
           <button
             onClick={handlePrev}
-            className="w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-sm"
+            className="w-7 h-7 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-sm"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-700" />
+            <ChevronLeft className="w-4 h-4 text-gray-700" />
           </button>
           <button
             onClick={handleNext}
-            className="w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-sm"
+            className="w-7 h-7 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-sm"
           >
-            <ChevronRight className="w-5 h-5 text-gray-700" />
+            <ChevronRight className="w-4 h-4 text-gray-700" />
           </button>
         </div>
       )}

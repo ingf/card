@@ -195,9 +195,9 @@ export default function Home() {
                             boxShadow: template.style.boxShadow
                           }}
                         >
-                          <div className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-full z-10 text-[10px] ${template.style.labelStyle}`}>
+                          {/* <div className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-full z-10 text-[10px] ${template.style.labelStyle}`}>
                             {template.name}
-                          </div>
+                          </div> */}
 
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center z-10">
                             <div className="flex gap-1 flex-col">
