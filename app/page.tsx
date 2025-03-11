@@ -200,19 +200,19 @@ export default function Home() {
                           </div> */}
 
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center z-10">
-                            <div className="flex gap-1 flex-col">
+                            <div className="flex gap-2 flex-col">
                               <Link
                                 href={`/preview?template=${templateId}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}-${index}`}
-                                className="bg-white hover:bg-gray-100 text-gray-800 px-2 py-1 rounded-lg flex items-center justify-center transition-colors text-xs"
+                                className="bg-white hover:bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
                               >
-                                <Eye className="h-3 w-3 mr-1" />
+                                <Eye className="h-4 w-4 mr-2" />
                                 预览
                               </Link>
                               <Link
                                 href={`/detail?template=${templateId}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}-${index}`}
-                                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-lg flex items-center justify-center transition-colors text-xs"
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
                               >
-                                <ExternalLink className="h-3 w-3 mr-1" />
+                                <ExternalLink className="h-4 w-4 mr-2" />
                                 使用
                               </Link>
                             </div>
