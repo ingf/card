@@ -172,15 +172,25 @@ export const effectiveLearningCard: Card = {
     accentColor: "#2196F3",
     backgroundColor: "#F5F9FF",
     colorScheme: "light",
-    textColor: "#333333"
+    textColor: "#333333",
+    animation: "fade",
+    primaryColor: "#2196F3",
+    borderRadius: "0.75rem",
+    cardStyle: "outlined",
+    fontFamily: "'Noto Sans SC', sans-serif"
   },
   layout: {
     type: "carousel",
     columns: 1,
     alignment: "center",
     spacing: "medium",
-    itemStyle: "card"
-  }
+    itemStyle: "card",
+    showDividers: true,
+    showNumbers: true,
+    showIcons: true,
+    animation: "slide"
+  },
+  type: "list"
 };
 
 // 时间管理卡片数据
@@ -221,15 +231,25 @@ export const timeManagementCard: Card = {
     accentColor: "#FF5722",
     backgroundColor: "#FFF9F5",
     colorScheme: "light",
-    textColor: "#3E2723"
+    textColor: "#3E2723",
+    animation: "fade",
+    primaryColor: "#FF5722",
+    borderRadius: "0.75rem",
+    cardStyle: "outlined",
+    fontFamily: "'Noto Sans SC', sans-serif"
   },
   layout: {
     type: "carousel",
     columns: 1,
     alignment: "center",
     spacing: "medium",
-    itemStyle: "card"
-  }
+    itemStyle: "card",
+    showDividers: true,
+    showNumbers: true,
+    showIcons: true,
+    animation: "slide"
+  },
+  type: "list"
 };
 
 // 职场沟通卡片数据
@@ -270,15 +290,25 @@ export const workplaceCommunicationCard: Card = {
     accentColor: "#673AB7",
     backgroundColor: "#F5F0FF",
     colorScheme: "light",
-    textColor: "#311B92"
+    textColor: "#311B92",
+    animation: "fade",
+    primaryColor: "#673AB7",
+    borderRadius: "0.75rem",
+    cardStyle: "outlined",
+    fontFamily: "'Noto Sans SC', sans-serif"
   },
   layout: {
     type: "carousel",
     columns: 1,
     alignment: "center",
     spacing: "medium",
-    itemStyle: "card"
-  }
+    itemStyle: "card",
+    showDividers: true,
+    showNumbers: true,
+    showIcons: true,
+    animation: "slide"
+  },
+  type: "list"
 };
 
 // 创意思维卡片数据
@@ -319,15 +349,25 @@ export const creativeThinkingCard: Card = {
     accentColor: "#00BCD4",
     backgroundColor: "#E0F7FA",
     colorScheme: "light",
-    textColor: "#006064"
+    textColor: "#006064",
+    animation: "fade",
+    primaryColor: "#00BCD4",
+    borderRadius: "0.75rem",
+    cardStyle: "outlined",
+    fontFamily: "'Noto Sans SC', sans-serif"
   },
   layout: {
     type: "carousel",
     columns: 1,
     alignment: "center",
     spacing: "medium",
-    itemStyle: "card"
-  }
+    itemStyle: "card",
+    showDividers: true,
+    showNumbers: true,
+    showIcons: true,
+    animation: "slide"
+  },
+  type: "list"
 };
 
 // 导出所有卡片数据的集合
