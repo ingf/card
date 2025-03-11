@@ -165,22 +165,25 @@ export default function Home() {
                 <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
                   {/* 模板选择标签 */}
                   <div className="p-3 bg-gray-50 border-b border-gray-200 flex overflow-x-auto">
-                    {templates.map((template) => (
-                      <button
-                        key={template.id}
-                        onClick={() => handleTemplateSelect(template.id)}
-                        className={`px-4 py-2 mx-1 text-sm rounded-lg transition-all ${selectedTemplate === template.id
+                    <button
+                      onClick={() => handleTemplateSelect("simple-1")}
+                      className={`px-4 py-2 mx-1 text-sm rounded-lg transition-all ${selectedTemplate === "simple-1"
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                      >
-                        {template.name}
-                      </button>
-                    ))}
+                        }`}
+                    >
+                      标准卡片
+                    </button>
+                    <button
+                      onClick={() => handleTemplateSelect("simple-2")}
+                      className={`px-4 py-2 mx-1 text-sm rounded-lg transition-all ${selectedTemplate === "simple-2"
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                    >
+                      大字封面
+                    </button>
                   </div>
-
-                  {/* 卡片预览 */}
-
                 </div>
               </div>
 
