@@ -257,27 +257,104 @@ export const allMockCards = [
 // 根据关键词获取卡片数据
 export function getCardByKeyword(keyword: string): Card {
   const lowerKeyword = keyword.toLowerCase();
-  
+
   if (lowerKeyword.includes('健康') || lowerKeyword.includes('饮食') || lowerKeyword.includes('营养')) {
     return healthyEatingCard;
   }
-  
+
   if (lowerKeyword.includes('学习') || lowerKeyword.includes('记忆') || lowerKeyword.includes('知识')) {
     return effectiveLearningCard;
   }
-  
+
   if (lowerKeyword.includes('时间') || lowerKeyword.includes('管理') || lowerKeyword.includes('效率')) {
     return timeManagementCard;
   }
-  
+
   if (lowerKeyword.includes('沟通') || lowerKeyword.includes('职场') || lowerKeyword.includes('交流')) {
     return workplaceCommunicationCard;
   }
-  
+
   if (lowerKeyword.includes('创意') || lowerKeyword.includes('创新') || lowerKeyword.includes('思维')) {
     return creativeThinkingCard;
   }
-  
+
   // 默认返回健康饮食卡片
   return healthyEatingCard;
-} 
+}
+
+// 卡片模板配置
+export const cardTemplates = [
+  {
+    id: "standard",
+    name: "标准卡片",
+    style: {
+      backgroundColor: "#f0f9f0",
+      backgroundImage: "linear-gradient(to bottom, #f0f9f0, #e8f5e8)",
+      border: "2px solid #a0d8a0",
+      boxShadow: "0 4px 8px rgba(0, 100, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
+      labelStyle: "bg-green-600 text-white",
+      titleColor: "#2e7d32",
+      titleSize: "0.9rem",
+      itemNumberColor: "#ffffff",
+      itemNumberBackground: "#4caf50",
+      contentFontSize: "0.75rem",
+      lineHeight: "1.3"
+    }
+  },
+  {
+    id: "headline",
+    name: "大字封面",
+    style: {
+      backgroundColor: "#f8f8f8",
+      backgroundImage: "linear-gradient(to bottom, #ffffff, #f0f0f0)",
+      border: "1px solid #d0d0d0",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.1)",
+      labelStyle: "bg-gray-700 text-white",
+      titleColor: "#333333",
+      titleSize: "1.1rem",
+      itemNumberColor: "#666666",
+      itemNumberBackground: "#f0f0f0",
+      contentFontSize: "0.75rem",
+      lineHeight: "1.3"
+    }
+  },
+  {
+    id: "blog",
+    name: "AI拼图blog",
+    style: {
+      backgroundColor: "#f0f4ff",
+      backgroundImage: "linear-gradient(135deg, #f0f4ff 0%, #e6eeff 100%)",
+      border: "2px solid #a0a0d8",
+      boxShadow: "0 4px 8px rgba(63, 81, 181, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
+      labelStyle: "bg-indigo-600 text-white",
+      titleColor: "#3f51b5",
+      titleSize: "0.9rem",
+      itemNumberColor: "#ffffff",
+      itemNumberBackground: "#3f51b5",
+      contentFontSize: "0.75rem",
+      lineHeight: "1.3"
+    }
+  },
+  {
+    id: "marketing",
+    name: "运营必知",
+    style: {
+      backgroundColor: "#fff0f5",
+      backgroundImage: "linear-gradient(135deg, #fff0f5 0%, #ffe6ee 100%)",
+      border: "2px solid #d8a0a0",
+      boxShadow: "0 4px 8px rgba(233, 30, 99, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
+      labelStyle: "bg-pink-600 text-white",
+      titleColor: "#e91e63",
+      titleSize: "1rem",
+      itemNumberColor: "#ffffff",
+      itemNumberBackground: "#e91e63",
+      contentFontSize: "0.75rem",
+      lineHeight: "1.3"
+    }
+  }
+];
+
+// 根据模板ID获取模板配置
+export function getTemplateById(templateId: string) {
+  return cardTemplates.find(template => template.id === templateId) || cardTemplates[0];
+}

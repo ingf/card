@@ -6,15 +6,16 @@ import { CardSchema } from "@/lib/schemas/card";
 import type { Card as CardType, Layout } from "@/lib/schemas/card";
 import { Sparkles, Loader2, Send, Clock, Download, Eye, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { getCardByKeyword } from "@/lib/mockData";
+import { getCardByKeyword, cardTemplates, getTemplateById } from "@/lib/mockData";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
   const [cardData, setCardData] = useState<CardType | null>(null);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("simple-1");
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("standard");
   const [inputHistory, setInputHistory] = useState<string[]>([]);
+  const [activeTemplates, setActiveTemplates] = useState<string[]>(["standard", "headline", "blog", "marketing"]);
 
   // 添加输入框引用，用于自动聚焦
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -66,9 +67,18 @@ export default function Home() {
     }
   };
 
-  // 选择模板
+  // 修改模板选择函数，使其可以切换模板的激活状态
   const handleTemplateSelect = (template: string) => {
     setSelectedTemplate(template);
+
+    // 如果模板已经在激活列表中，则移除它；否则添加它
+    if (activeTemplates.includes(template)) {
+      if (activeTemplates.length > 1) { // 确保至少有一个激活的模板
+        setActiveTemplates(prev => prev.filter(t => t !== template));
+      }
+    } else {
+      setActiveTemplates(prev => [...prev, template]);
+    }
   };
 
   // 生成详情页链接
@@ -76,14 +86,6 @@ export default function Home() {
     if (!cardData) return "#";
     return `/detail?template=${template}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}`;
   };
-
-  // 模板配置
-  const templates = [
-    { id: "simple-1", name: "标准卡片" },
-    { id: "simple-2", name: "大字封面" },
-    { id: "simple-3", name: "AI拼图blog" },
-    { id: "simple-4", name: "运营必知" }
-  ];
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex flex-col">
@@ -159,69 +161,103 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 模板选择 */}
-              <div className="mb-4">
-                {/* 模板选择器 */}
-                <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-                  {/* 模板选择标签 */}
-                  <div className="p-3 bg-gray-50 border-b border-gray-200 flex overflow-x-auto">
-                    <button
-                      onClick={() => handleTemplateSelect("simple-1")}
-                      className={`px-4 py-2 mx-1 text-sm rounded-lg transition-all ${selectedTemplate === "simple-1"
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                    >
-                      标准卡片
-                    </button>
-                    <button
-                      onClick={() => handleTemplateSelect("simple-2")}
-                      className={`px-4 py-2 mx-1 text-sm rounded-lg transition-all ${selectedTemplate === "simple-2"
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                    >
-                      大字封面
-                    </button>
-                  </div>
+              {/* 替换清除按钮区域 */}
+              <div className="mb-4 flex justify-between items-center">
+                <div className="text-sm text-gray-500">
+                  {cardData ? "已生成卡片，显示不同样式效果" : "尚未生成卡片"}
                 </div>
+                {cardData && (
+                  <button
+                    onClick={() => setCardData(null)}
+                    className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm transition-colors"
+                  >
+                    清除卡片
+                  </button>
+                )}
               </div>
 
-              <div className="p-4 flex justify-center items-center" style={{ minHeight: "500px" }}>
+              <div className="p-4">
                 {cardData && (
-                  <div className="flex justify-center">
-                    <div className="transform origin-center relative group">
-                      {/* 悬停时显示的背景和按钮 */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center z-10">
-                        <div className="flex gap-3">
-                          <Link
-                            href={`/preview?template=${selectedTemplate}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}`}
-                            className="bg-white hover:bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center transition-colors"
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            预览
-                          </Link>
-                          <Link
-                            href={getDetailLink(selectedTemplate)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            使用
-                          </Link>
-                        </div>
-                      </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {activeTemplates.map((templateId, index) => {
+                      const template = getTemplateById(templateId);
+                      return (
+                        <div
+                          key={templateId}
+                          className="transform origin-center relative group overflow-hidden"
+                          style={{
+                            aspectRatio: "3/4",
+                            maxWidth: "100%",
+                            backgroundColor: template.style.backgroundColor,
+                            backgroundImage: template.style.backgroundImage,
+                            border: template.style.border,
+                            borderRadius: "12px",
+                            boxShadow: template.style.boxShadow
+                          }}
+                        >
+                          <div className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-full z-10 text-[10px] ${template.style.labelStyle}`}>
+                            {template.name}
+                          </div>
 
-                      {/* 移除原来的单独按钮 */}
-                      <Card
-                        data={{
-                          ...cardData,
-                          layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
-                        }}
-                        platformRatio="3:4"
-                        posterFormat={selectedTemplate}
-                        hideNavigation={true}
-                      />
-                    </div>
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center z-10">
+                            <div className="flex gap-1 flex-col">
+                              <Link
+                                href={`/preview?template=${templateId}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}-${index}`}
+                                className="bg-white hover:bg-gray-100 text-gray-800 px-2 py-1 rounded-lg flex items-center justify-center transition-colors text-xs"
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                预览
+                              </Link>
+                              <Link
+                                href={`/detail?template=${templateId}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}-${index}`}
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-lg flex items-center justify-center transition-colors text-xs"
+                              >
+                                <ExternalLink className="h-3 w-3 mr-1" />
+                                使用
+                              </Link>
+                            </div>
+                          </div>
+
+                          <div className="w-full h-full">
+                            <Card
+                              data={{
+                                ...cardData,
+                                items: templateId === "standard" ? cardData.items.slice(0, 1) : cardData.items,
+                                layout: {
+                                  type: "carousel",
+                                  columns: 1,
+                                  alignment: "center",
+                                  spacing: "small",
+                                  itemStyle: "card",
+                                  showDividers: false,
+                                  showNumbers: true,
+                                  showIcons: false,
+                                  animation: "slide"
+                                },
+                                style: {
+                                  backgroundColor: "transparent",
+                                  borderColor: "transparent",
+                                  borderWidth: 0,
+                                  borderRadius: "0px",
+                                  padding: "8px",
+                                  titleColor: template.style.titleColor,
+                                  titleSize: template.style.titleSize,
+                                  itemNumberColor: template.style.itemNumberColor,
+                                  itemNumberBackground: template.style.itemNumberBackground,
+                                  contentFontSize: template.style.contentFontSize,
+                                  lineHeight: template.style.lineHeight
+                                }
+                              }}
+                              width={1242}
+                              height={1659}
+                              posterFormat={templateId}
+                              hideNavigation={true}
+                              className="h-full w-full"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

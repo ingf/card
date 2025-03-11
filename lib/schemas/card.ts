@@ -47,16 +47,30 @@ export const CardItemSchema = z.object({
     url: z.string(),
     text: z.string().optional(),
     isExternal: z.boolean().optional().default(false)
-  }).optional() // 可选链接
+  }).optional(), // 可选链接
+  // 新增字段，支持更多类型的内容
+  bulletPoints: z.array(z.string()).optional(), // 支持列表项
+  percentage: z.number().optional(), // 支持百分比显示
+  imageUrl: z.string().optional(), // 支持图片URL
+  date: z.string().optional(), // 支持日期显示
+  location: z.string().optional(), // 支持位置信息
+  keyValue: z.record(z.string()).optional(), // 支持键值对显示
+  templateText: z.string().optional(), // 支持模板文本（如面试话术）
 })
 
 // 定义布局类型
 export const LayoutSchema = z.object({
-  type: z.enum(["grid", "list", "carousel"]),
+  type: z.enum(["grid", "list", "carousel", "tabs", "accordion", "timeline", "comparison"]),
   columns: z.number().optional(),
   alignment: z.enum(["left", "center", "right"]).optional(),
   spacing: z.enum(["small", "medium", "large"]).optional(),
-  itemStyle: z.enum(["card", "bordered", "minimal"]).optional()
+  itemStyle: z.enum(["card", "bordered", "minimal", "numbered", "icon", "image"]).optional(),
+  showDividers: z.boolean().optional().default(false),
+  showNumbers: z.boolean().optional().default(false),
+  showIcons: z.boolean().optional().default(false),
+  animation: z.enum(["none", "fade", "slide", "zoom"]).optional().default("none"),
+  maxHeight: z.string().optional(), // 支持最大高度设置
+  aspectRatio: z.string().optional(), // 支持宽高比设置
 })
 
 // 定义主题类型
@@ -69,8 +83,49 @@ export const ThemeSchema = z.object({
   borderRadius: z.string().optional().default("0.5rem"),
   cardStyle: z.enum(["flat", "outlined", "elevated", "glass"]).optional().default("elevated"),
   colorScheme: z.enum(["light", "dark", "auto"]).optional().default("light"),
-  animation: z.enum(["none", "fade", "slide", "zoom"]).optional().default("none")
+  animation: z.enum(["none", "fade", "slide", "zoom"]).optional().default("none"),
+  // 新增主题属性
+  headerStyle: z.object({
+    backgroundColor: z.string().optional(),
+    textColor: z.string().optional(),
+    borderBottom: z.boolean().optional(),
+    padding: z.string().optional(),
+  }).optional(),
+  footerStyle: z.object({
+    backgroundColor: z.string().optional(),
+    textColor: z.string().optional(),
+    borderTop: z.boolean().optional(),
+    padding: z.string().optional(),
+  }).optional(),
+  itemStyle: z.object({
+    backgroundColor: z.string().optional(),
+    borderColor: z.string().optional(),
+    borderWidth: z.string().optional(),
+    shadow: z.enum(["none", "sm", "md", "lg"]).optional(),
+    margin: z.string().optional(),
+  }).optional(),
+  highlightStyle: z.object({
+    backgroundColor: z.string().optional(),
+    borderColor: z.string().optional(),
+    textColor: z.string().optional(),
+  }).optional(),
 })
+
+// 定义卡片类型
+export const CardTypeSchema = z.enum([
+  "info", // 普通信息卡片
+  "list", // 列表卡片
+  "steps", // 步骤卡片
+  "comparison", // 比较卡片
+  "faq", // 问答卡片
+  "interview", // 面试卡片
+  "insurance", // 保险信息卡片
+  "learning", // 学习方法卡片
+  "travel", // 旅行指南卡片
+  "timeline", // 时间线卡片
+  "stats", // 统计数据卡片
+  "custom" // 自定义卡片
+])
 
 // 定义整个卡片的数据结构
 export const CardSchema = z.object({
@@ -78,12 +133,42 @@ export const CardSchema = z.object({
   subtitle: z.string().optional(), // 副标题
   description: z.string().optional(), // 卡片整体描述
   layout: LayoutSchema.optional(),
-  theme: ThemeSchema.optional(),
+  theme: ThemeSchema,
   items: z.array(CardItemSchema),
   footer: z.object({
     text: z.string().optional(),
-    showAttribution: z.boolean().optional().default(false)
-  }).optional()
+    showAttribution: z.boolean().optional().default(false),
+    links: z.array(z.object({
+      text: z.string(),
+      url: z.string(),
+      icon: z.string().optional(),
+    })).optional(),
+  }).optional(),
+  // 新增字段
+  type: CardTypeSchema.optional().default("info"), // 卡片类型
+  header: z.object({
+    icon: IconSchema.optional(),
+    visualElement: VisualElementSchema.optional(),
+    actions: z.array(z.object({
+      text: z.string(),
+      icon: z.string().optional(),
+      action: z.string(),
+    })).optional(),
+  }).optional(),
+  metadata: z.object({
+    author: z.string().optional(),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    source: z.string().optional(),
+  }).optional(),
+  interactivity: z.object({
+    isExpandable: z.boolean().optional().default(false),
+    isSwipeable: z.boolean().optional().default(false),
+    hasSearch: z.boolean().optional().default(false),
+    hasFilters: z.boolean().optional().default(false),
+    hasSorting: z.boolean().optional().default(false),
+  }).optional(),
 })
 
 export type Icon = z.infer<typeof IconSchema>
@@ -91,4 +176,5 @@ export type VisualElement = z.infer<typeof VisualElementSchema>
 export type CardItem = z.infer<typeof CardItemSchema>
 export type Layout = z.infer<typeof LayoutSchema>
 export type Theme = z.infer<typeof ThemeSchema>
+export type CardType = z.infer<typeof CardTypeSchema>
 export type Card = z.infer<typeof CardSchema>

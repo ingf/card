@@ -688,3 +688,12 @@ input, textarea, select {
   margin-left: 2px;
   flex-shrink: 0;
 }
+
+
+.card-container {
+  height: 100%;
+}
+
+.simple-card {
+  height: 100%;
+}

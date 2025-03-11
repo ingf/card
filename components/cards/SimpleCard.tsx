@@ -43,7 +43,7 @@ export default function SimpleCard({
   switch (variant) {
     case 'large-title':
       return (
-        <div className={`simple-card bg-${themeColor}-50 rounded-lg shadow-md overflow-hidden border border-${themeColor}-100`} style={{ width: "100%", maxWidth: "360px" }}>
+        <div className={`simple-card bg-${themeColor}-50 rounded-lg shadow-md overflow-hidden border border-${themeColor}-100`}>
           {/* 大字标题样式 */}
           <div className={`p-6 text-center bg-${themeColor}-500 text-white`}>
             <h3 className="text-3xl font-black">{data.title}</h3>
@@ -147,7 +147,7 @@ export default function SimpleCard({
     case 'standard':
     default:
       return (
-        <div className={`simple-card bg-${themeColor}-50 rounded-lg shadow-md overflow-hidden border border-${themeColor}-100`} style={{ width: "100%", maxWidth: "360px" }}>
+        <div className={`simple-card bg-${themeColor}-50 rounded-lg shadow-md overflow-hidden border border-${themeColor}-100`}>
           {/* 标题区域 */}
           <div className={`p-4 text-center border-b border-${themeColor}-100`}>
             <h3 className={`text-xl font-bold text-${themeColor}-800`}>{data.title}</h3>
