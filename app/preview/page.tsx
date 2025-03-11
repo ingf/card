@@ -6,99 +6,7 @@ import { Card as CardType } from "@/lib/schemas/card";
 import { ArrowLeft, Download, Share2 } from "lucide-react";
 import Link from "next/link";
 import { getCardByKeyword, getTemplateById } from "@/lib/mockData";
-import { cn } from "@/lib/utils";
-
-// 单个卡片项组件
-const CardItem = ({ item, theme, index }: {
-  item: any,
-  theme?: any,
-  index: number
-}) => {
-  const primaryColor = theme?.primaryColor || '#FF9966';
-  const textColor = theme?.textColor || '#000000';
-  const accentColor = theme?.accentColor || primaryColor;
-
-  return (
-    <div className="w-full bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 mb-6">
-      {/* 卡片头部 */}
-      <div className="p-4 border-b border-gray-100 flex items-center gap-3">
-        <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-white flex-shrink-0"
-          style={{ backgroundColor: primaryColor }}
-        >
-          <span>{index + 1}</span>
-        </div>
-        <h3 className="text-xl font-semibold" style={{ color: textColor }}>
-          {item.title}
-        </h3>
-        {item.icon && (
-          <span className="text-xl">{item.icon.value}</span>
-        )}
-      </div>
-
-      {/* 卡片内容 */}
-      <div className="p-6">
-        {/* 标签 */}
-        {item.tags && item.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {item.tags.map((tag: string, idx: number) => (
-              <span
-                key={idx}
-                className="px-2 py-1 text-xs rounded-full"
-                style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* 描述文本 */}
-        <p className="text-gray-700 mb-4 leading-relaxed">
-          {item.description}
-        </p>
-
-        {/* 要点列表 */}
-        {item.bulletPoints && (
-          <ul className="mt-4 space-y-2 mb-4">
-            {item.bulletPoints.map((point: string, idx: number) => (
-              <li key={idx} className="flex items-start gap-2 text-gray-700">
-                <span style={{ color: accentColor }}>•</span>
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* 行动步骤 */}
-        {item.actionStep && (
-          <div className="p-4 rounded-lg mt-4 bg-gray-50 border-l-4" style={{ borderLeftColor: accentColor }}>
-            <div className="text-sm font-medium mb-1" style={{ color: accentColor }}>行动步骤</div>
-            <p className="text-gray-700">{item.actionStep}</p>
-          </div>
-        )}
-
-        {/* 链接 */}
-        {item.link && (
-          <div className="mt-4">
-            <a
-              href={item.link.url}
-              target={item.link.isExternal ? "_blank" : undefined}
-              rel={item.link.isExternal ? "noopener noreferrer" : undefined}
-              className="inline-flex items-center hover:underline"
-              style={{ color: primaryColor }}
-            >
-              {item.link.text || "了解更多"}
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-              </svg>
-            </a>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+import { Card } from "@/components/Card";
 
 export default function PreviewPage() {
   const searchParams = useSearchParams();
@@ -171,7 +79,7 @@ export default function PreviewPage() {
         </div>
       </div>
 
-      {/* 主内容区域 - 纵向排列卡片内容 */}
+      {/* 主内容区域 - 使用Card组件展示卡片 */}
       <div className="flex-grow p-4 overflow-y-auto">
         {isLoading ? (
           <div className="text-center py-12">
@@ -181,50 +89,40 @@ export default function PreviewPage() {
         ) : cardData ? (
           <div className="max-w-3xl mx-auto">
             {/* 卡片标题区域 */}
-            <div
-              className="w-full bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 mb-6 p-6"
-              style={{
-                backgroundColor: templateStyle.backgroundColor || 'white',
-                backgroundImage: templateStyle.backgroundImage,
-                boxShadow: templateStyle.boxShadow
-              }}
-            >
+            <div className="mb-6 text-center">
               <h2 className="text-2xl font-bold mb-2" style={{ color: templateStyle.titleColor || '#000' }}>
                 {cardData.title}
               </h2>
               {cardData.subtitle && (
-                <p className="text-gray-600 mb-4">{cardData.subtitle}</p>
-              )}
-
-              {/* 元数据 */}
-              {cardData.metadata && (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {cardData.metadata.tags && cardData.metadata.tags.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-1 text-xs rounded-full bg-gray-100"
-                      style={{ backgroundColor: `${cardData.theme.primaryColor}15`, color: cardData.theme.primaryColor }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                <p className="text-gray-600">{cardData.subtitle}</p>
               )}
             </div>
 
-            {/* 卡片内容区域 - 纵向排列所有项 */}
-            {cardData.items.map((item, index) => (
-              <CardItem
-                key={item.id}
-                item={item}
-                theme={cardData.theme}
-                index={index}
-              />
-            ))}
+            {/* 使用Card组件展示每个卡片项 */}
+            <div className="space-y-8">
+              {cardData.items.map((item, index) => (
+                <div key={index} className="transform scale-100 origin-top">
+                  <Card
+                    data={{
+                      ...cardData,
+                      items: [{ ...item, id: index + 1 }], // 设置id为当前索引+1，确保序号正确递增
+                      layout: {
+                        ...cardData.layout,
+                        type: "carousel",
+                        columns: 1,
+                      }
+                    }}
+                    posterFormat={template}
+                    hideNavigation={true}
+                    className="w-full shadow-lg"
+                  />
+                </div>
+              ))}
+            </div>
 
             {/* 底部信息 */}
             {cardData.footer && (
-              <div className="w-full bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 p-4 mb-6">
+              <div className="w-full bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 p-4 mt-8 mb-6">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">{cardData.footer.text}</span>
                   {cardData.footer.links && cardData.footer.links.length > 0 && (
@@ -281,4 +179,4 @@ export default function PreviewPage() {
       </div>
     </main>
   );
-} 
+}

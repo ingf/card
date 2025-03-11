@@ -300,7 +300,7 @@ const renderListCard = (data: CardType, item: CardItemType, index: number, poste
       </div>
 
       {/* 卡片内容 */}
-      <div className="flex-grow p-4 overflow-y-auto">
+      <div className="flex-grow p-4 overflow-y-hidden">
         <div className="mb-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-white"
