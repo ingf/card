@@ -248,8 +248,8 @@ export default function Home() {
                                   lineHeight: template.style.lineHeight
                                 }
                               }}
-                              width={1242}
-                              height={1659}
+                              // width={1242}
+                              // height={1659}
                               posterFormat={templateId}
                               hideNavigation={true}
                               className="h-full w-full"
