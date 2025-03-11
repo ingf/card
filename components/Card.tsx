@@ -406,20 +406,234 @@ const renderCardContent = (item: CardItemType, index: number, data: CardType, po
   }
 };
 
-export function Card({ 
-  data, 
-  platformRatio = "3:4", 
-  posterFormat = "standard",
-  hideNavigation = false 
-}: CardProps) {
+// 根据卡片类型渲染不同的布局
+const renderCardByType = (data: CardType, currentIndex: number, posterFormat: string) => {
+  const currentItem = data.items[currentIndex];
+
+  switch (data.type) {
+    case "list":
+      return renderListCard(data, currentItem, currentIndex, posterFormat);
+    case "steps":
+      return renderStepsCard(data, currentItem, currentIndex, posterFormat);
+    case "comparison":
+      return renderComparisonCard(data, currentItem, currentIndex, posterFormat);
+    case "faq":
+      return renderFaqCard(data, currentItem, currentIndex, posterFormat);
+    case "timeline":
+      return renderTimelineCard(data, currentItem, currentIndex, posterFormat);
+    default:
+      return renderDefaultCard(data, currentItem, currentIndex, posterFormat);
+  }
+};
+
+// 列表卡片布局
+const renderListCard = (data: CardType, item: CardItemType, index: number, posterFormat: string) => {
+  const theme = data.theme;
+  const primaryColor = theme?.primaryColor || '#4CAF50';
+  const accentColor = theme?.accentColor || '#8BC34A';
+
   return (
-    <div className="card-container" style={{ aspectRatio: platformRatio }}>
-      <CardFactory 
-        data={data} 
-        platformRatio={platformRatio} 
-        posterFormat={posterFormat}
-        hideNavigation={hideNavigation}
-      />
+    <div className="flex flex-col h-full rounded-lg overflow-hidden"
+      style={{ backgroundColor: theme?.backgroundColor || '#FFFFFF' }}>
+      {/* 卡片头部 */}
+      <div className="p-4" style={{
+        backgroundColor: theme?.headerStyle?.backgroundColor || '#F1F8E9',
+        color: theme?.headerStyle?.textColor || '#33691E'
+      }}>
+        <div className="flex items-center gap-2 mb-2">
+          {data.header?.icon && (
+            <span className="text-2xl">{data.header.icon.value}</span>
+          )}
+          <h2 className="text-xl font-bold">{data.title}</h2>
+        </div>
+        {data.subtitle && (
+          <p className="text-sm opacity-80">{data.subtitle}</p>
+        )}
+
+        {/* 标签 */}
+        {data.metadata?.tags && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {data.metadata.tags.map((tag, idx) => (
+              <span key={idx} className="px-2 py-0.5 text-xs rounded-full"
+                style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 卡片内容 */}
+      <div className="flex-grow p-4 overflow-y-auto">
+        <div className="mb-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+              style={{ backgroundColor: primaryColor }}>
+              <span>{index + 1}</span>
+            </div>
+            <h3 className="text-lg font-semibold" style={{ color: theme?.textColor || '#212121' }}>
+              {item.title}
+            </h3>
+            {item.icon && (
+              <span className="text-xl">{item.icon.value}</span>
+            )}
+          </div>
+
+          <p className="text-sm leading-relaxed" style={{ color: `${theme?.textColor || '#212121'}CC` }}>
+            {item.description}
+          </p>
+
+          {/* 要点列表 */}
+          {item.bulletPoints && (
+            <ul className="mt-3 space-y-1">
+              {item.bulletPoints.map((point, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-sm">
+                  <span style={{ color: accentColor }}>•</span>
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* 行动步骤 */}
+        {item.actionStep && (
+          <div className="p-3 rounded-lg mt-3" style={{
+            backgroundColor: `${accentColor}15`,
+            borderLeft: `3px solid ${accentColor}`
+          }}>
+            <div className="text-xs font-medium mb-1" style={{ color: accentColor }}>行动步骤</div>
+            <p className="text-sm">{item.actionStep}</p>
+          </div>
+        )}
+      </div>
+
+      {/* 卡片底部 */}
+      {data.footer && (
+        <div className="p-3 text-sm border-t" style={{
+          backgroundColor: theme?.footerStyle?.backgroundColor || '#F1F8E9',
+          color: theme?.footerStyle?.textColor || '#689F38',
+          borderColor: `${primaryColor}30`
+        }}>
+          <div className="flex items-center justify-between">
+            <span>{data.footer.text}</span>
+            {data.footer.links && data.footer.links.length > 0 && (
+              <a href={data.footer.links[0].url} className="flex items-center gap-1 hover:underline"
+                style={{ color: primaryColor }}>
+                {data.footer.links[0].text}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 步骤卡片布局
+const renderStepsCard = (data: CardType, item: CardItemType, index: number, posterFormat: string) => {
+  const theme = data.theme;
+  const primaryColor = theme?.primaryColor || '#2196F3';
+
+  return (
+    <div className="flex flex-col h-full rounded-lg overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* 卡片头部 */}
+      <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <h2 className="text-xl font-bold">{data.title}</h2>
+        {data.subtitle && (
+          <p className="text-sm opacity-90 mt-1">{data.subtitle}</p>
+        )}
+      </div>
+
+      {/* 步骤内容 */}
+      <div className="flex-grow p-4 overflow-y-auto">
+        <div className="relative pl-10 pb-8 border-l-2 border-blue-300">
+          <div className="absolute left-0 top-0 -translate-x-1/2 w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs">
+            {index + 1}
+          </div>
+
+          <h3 className="text-lg font-semibold text-blue-800 mb-2">{item.title}</h3>
+          <p className="text-sm text-blue-900/80 leading-relaxed">{item.description}</p>
+
+          {item.actionStep && (
+            <div className="mt-3 p-3 bg-white/70 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-700">{item.actionStep}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 进度指示器 */}
+      <div className="p-3 bg-white/80 border-t border-blue-100">
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-blue-600">步骤 {index + 1}/{data.items.length}</span>
+          <div className="flex gap-1">
+            {data.items.map((_, i) => (
+              <div key={i} className={`w-2 h-2 rounded-full ${i === index ? 'bg-blue-500' : 'bg-blue-200'}`}></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 其他类型的卡片布局...
+
+export function Card({ data, width = 375, height = 500, platformRatio = "default", posterFormat = "default", hideNavigation = false, className = "" }: CardProps & { width?: number, height?: number, className?: string }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const totalItems = data.items.length;
+
+  // 处理导航
+  const handlePrev = useCallback(() => {
+    setCurrentIndex(prev => (prev - 1 + totalItems) % totalItems);
+  }, [totalItems]);
+
+  const handleNext = useCallback(() => {
+    setCurrentIndex(prev => (prev + 1) % totalItems);
+  }, [totalItems]);
+
+  // 获取平台比例配置
+  const ratio = platformRatios[platformRatio as keyof typeof platformRatios] || platformRatios.default;
+
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden",
+        ratio.class,
+        className
+      )}
+      style={{
+        width: width ? `${width}px` : ratio.width,
+        height: height ? `${height}px` : ratio.height,
+      }}
+    >
+      {/* 根据卡片类型渲染不同布局 */}
+      {renderCardByType(data, currentIndex, posterFormat)}
+
+      {/* 导航按钮 */}
+      {!hideNavigation && totalItems > 1 && (
+        <div className="absolute bottom-4 right-4 flex gap-2">
+          <button
+            onClick={handlePrev}
+            className="w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-sm"
+          >
+            <ChevronLeft className="w-5 h-5 text-gray-700" />
+          </button>
+          <button
+            onClick={handleNext}
+            className="w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-sm"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-700" />
+          </button>
+        </div>
+      )}
     </div>
   );
 } 

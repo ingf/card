@@ -8,7 +8,17 @@ export const healthyEatingCard: Card = {
       id: 1,
       title: "均衡营养",
       actionStep: "使用食物金字塔指导膳食，确保每日摄入足够的营养。",
-      highlight: true
+      highlight: true,
+      icon: {
+        type: "emoji",
+        value: "🥗"
+      },
+      tags: ["必备知识", "日常饮食"],
+      bulletPoints: [
+        "每天摄入至少5种不同颜色的蔬果",
+        "优先选择全谷物而非精制谷物",
+        "选择优质蛋白质来源如鱼类、豆类和坚果"
+      ]
     },
     {
       description: "控制食物份量是维持健康体重的关键。过量饮食会导致能量摄入过剩，增加肥胖和相关疾病的风险。学习如何估算食物份量，并根据自身活动水平调整摄入量，有助于保持健康的能量平衡。",
@@ -35,17 +45,92 @@ export const healthyEatingCard: Card = {
   title: "健康饮食的五个关键点",
   subtitle: "开启健康生活之旅，从均衡饮食开始",
   theme: {
-    accentColor: "#4CAF50",
+    primaryColor: "#4CAF50",
     backgroundColor: "#FFFFFF",
-    colorScheme: "light",
-    textColor: "#212121"
+    textColor: "#212121",
+    borderRadius: "0.75rem",
+    cardStyle: "elevated",
+    animation: "fade",
+    accentColor: "#8BC34A",
+    fontFamily: "'Noto Sans SC', sans-serif",
+    headerStyle: {
+      backgroundColor: "#F1F8E9",
+      textColor: "#33691E",
+      borderBottom: true,
+      padding: "1.25rem"
+    },
+    footerStyle: {
+      backgroundColor: "#F1F8E9",
+      textColor: "#689F38",
+      borderTop: true,
+      padding: "1rem"
+    },
+    itemStyle: {
+      backgroundColor: "#FAFAFA",
+      borderColor: "#E0E0E0",
+      borderWidth: "1px",
+      shadow: "md",
+      margin: "0.75rem"
+    },
+    highlightStyle: {
+      backgroundColor: "#F1F8E9",
+      borderColor: "#8BC34A",
+      textColor: "#33691E"
+    }
   },
   layout: {
     type: "carousel",
     columns: 1,
     alignment: "center",
     spacing: "medium",
-    itemStyle: "card"
+    itemStyle: "card",
+    showDividers: true,
+    showNumbers: true,
+    showIcons: true,
+    animation: "slide"
+  },
+  type: "list",
+  header: {
+    icon: {
+      type: "emoji",
+      value: "🥦"
+    },
+    actions: [
+      {
+        text: "收藏",
+        icon: "bookmark",
+        action: "save"
+      },
+      {
+        text: "分享",
+        icon: "share",
+        action: "share"
+      }
+    ]
+  },
+  footer: {
+    text: "健康饮食是健康生活的基础",
+    showAttribution: true,
+    links: [
+      {
+        text: "了解更多",
+        url: "#",
+        icon: "external-link"
+      }
+    ]
+  },
+  metadata: {
+    author: "营养专家",
+    createdAt: "2023-09-15",
+    tags: ["健康", "饮食", "营养", "生活方式"],
+    source: "健康生活指南"
+  },
+  interactivity: {
+    isExpandable: true,
+    isSwipeable: true,
+    hasSearch: false,
+    hasFilters: true,
+    hasSorting: false
   }
 };
 
