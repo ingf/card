@@ -10,11 +10,23 @@ import { getCardByKeyword, cardTemplates, getTemplateById } from "@/lib/mockData
 
 export default function Home() {
   const [error, setError] = useState<string>("");
-  const [cardData, setCardData] = useState<CardType | null>(null);
+  const [cardData, setCardData] = useState<CardType | null>(() => {
+    if (typeof window !== 'undefined') {
+      const savedCardData = sessionStorage.getItem('cardData');
+      return savedCardData ? JSON.parse(savedCardData) : null;
+    }
+    return null;
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>("standard");
-  const [inputHistory, setInputHistory] = useState<string[]>([]);
+  const [inputHistory, setInputHistory] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const savedHistory = sessionStorage.getItem('inputHistory');
+      return savedHistory ? JSON.parse(savedHistory) : [];
+    }
+    return [];
+  });
   const [activeTemplates, setActiveTemplates] = useState<string[]>(["standard", "headline", "blog", "marketing"]);
 
   // 添加输入框引用，用于自动聚焦
@@ -28,6 +40,18 @@ export default function Home() {
       inputRef.current.focus();
     }
   }, [isLoading, cardData]);
+
+  useEffect(() => {
+    if (cardData) {
+      sessionStorage.setItem('cardData', JSON.stringify(cardData));
+    }
+  }, [cardData]);
+
+  useEffect(() => {
+    if (inputHistory.length > 0) {
+      sessionStorage.setItem('inputHistory', JSON.stringify(inputHistory));
+    }
+  }, [inputHistory]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,6 +109,11 @@ export default function Home() {
   const getDetailLink = (template: string) => {
     if (!cardData) return "#";
     return `/detail?template=${template}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}`;
+  };
+
+  const clearCardData = () => {
+    setCardData(null);
+    sessionStorage.removeItem('cardData');
   };
 
   return (
@@ -168,7 +197,7 @@ export default function Home() {
                 </div>
                 {cardData && (
                   <button
-                    onClick={() => setCardData(null)}
+                    onClick={clearCardData}
                     className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm transition-colors"
                   >
                     清除卡片
