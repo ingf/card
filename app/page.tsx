@@ -97,6 +97,7 @@ export default function Home() {
   // 添加海报格式选择函数
   const handlePosterFormatChange = (format: string) => {
     setPosterFormat(format);
+    setSelectedTemplate(format);
   };
 
   // 添加选择模板的处理函数
@@ -125,6 +126,13 @@ export default function Home() {
     if (!cardData) return "#";
     return `/detail?template=${template}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}`;
   };
+
+  // 模板配置
+  const templateConfigs = [
+    { id: "standard", name: "标准卡片", color: "bg-blue-500", textColor: "text-blue-700", bgColor: "bg-blue-50", borderColor: "border-blue-200" },
+    { id: "simple", name: "简单海报", color: "bg-green-500", textColor: "text-green-700", bgColor: "bg-green-50", borderColor: "border-green-200" },
+    { id: "complex", name: "复杂海报", color: "bg-purple-500", textColor: "text-purple-700", bgColor: "bg-purple-50", borderColor: "border-purple-200" }
+  ];
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex flex-col">
@@ -214,201 +222,72 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 多种模板展示 - 网格布局 */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* 标准卡片模板 */}
-                <div className={`bg-white rounded-lg shadow-md overflow-hidden border ${selectedTemplate === "standard" ? "border-blue-400 ring-2 ring-blue-200" : "border-gray-200"} hover:shadow-lg transition-all flex flex-col h-full`}>
-                  <div className="p-2 bg-blue-50 border-b border-blue-100 flex justify-between items-center">
-                    <span className="text-xs font-medium text-blue-700">标准卡片</span>
-                    <div className="flex space-x-1">
+              {/* 模板选择 Tabs */}
+              <div className="mb-4">
+                <div className="flex space-x-2 mb-4">
+                  {templateConfigs.map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => handleTemplateSelect(template.id, template.id)}
+                      className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${selectedTemplate === template.id
+                          ? `${template.color} text-white shadow-md`
+                          : `${template.bgColor} ${template.textColor} hover:bg-gray-100 border border-gray-200`
+                        }`}
+                    >
+                      {template.name}
+                      {selectedTemplate === template.id && (
+                        <span className="ml-2 text-xs bg-white/20 px-1.5 py-0.5 rounded-full">已选择</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 卡片内容区域 */}
+                <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+                  {/* 预览和操作按钮 */}
+                  <div className="flex justify-between items-center p-3 bg-gray-50 border-b border-gray-200">
+                    <div className="flex space-x-2">
                       <button
-                        onClick={() => openPreview("standard")}
-                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-0.5 rounded flex items-center"
+                        onClick={() => openPreview(selectedTemplate)}
+                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full flex items-center"
                       >
                         <Eye className="h-3 w-3 mr-1" />
                         预览
                       </button>
-                      <button
-                        onClick={() => handleTemplateSelect("standard", "standard")}
-                        className={`text-xs ${selectedTemplate === "standard" ? "bg-blue-600" : "bg-blue-500"} text-white px-2 py-0.5 rounded flex items-center`}
+                      <Link
+                        href={getDetailLink(selectedTemplate)}
+                        className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full flex items-center"
                       >
-                        {selectedTemplate === "standard" ? "已选择" : "选择"}
-                      </button>
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        使用此模板
+                      </Link>
                     </div>
+                    <button
+                      onClick={() => alert('下载功能将在后续版本中实现')}
+                      className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full flex items-center"
+                    >
+                      <Download className="h-3 w-3 mr-1" />
+                      下载
+                    </button>
                   </div>
-                  <div className="p-3 flex-grow flex justify-center items-center">
-                    <div className="w-full h-full flex items-center justify-center">
-                      {cardData && (
-                        <div className="transform scale-90 origin-center">
-                          <Card
-                            data={{
-                              ...cardData,
-                              layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
-                            }}
-                            platformRatio="3:4"
-                            posterFormat="standard"
-                            hideNavigation={true}
-                          />
-                          {/* 底部按钮栏 */}
-                          <div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
-                            <Link
-                              href={getDetailLink("standard")}
-                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
-                            >
-                              <span className="text-xs">编辑</span>
-                            </Link>
-                            <button
-                              onClick={() => alert('下载功能将在后续版本中实现')}
-                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
-                            >
-                              <span className="text-xs">下载</span>
-                            </button>
-                            <button
-                              onClick={() => alert('更多功能将在后续版本中实现')}
-                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                              <span className="text-xs">⋮</span>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+
+                  {/* 卡片内容 */}
+                  <div className="p-4 flex justify-center items-center" style={{ minHeight: "500px" }}>
+                    {cardData && (
+                      <div className="transform origin-center">
+                        <Card
+                          data={{
+                            ...cardData,
+                            layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
+                          }}
+                          platformRatio="3:4"
+                          posterFormat={selectedTemplate}
+                          hideNavigation={true}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {/* 简单海报模板 */}
-                <div className={`bg-white rounded-lg shadow-md overflow-hidden border ${selectedTemplate === "simple" ? "border-green-400 ring-2 ring-green-200" : "border-gray-200"} hover:shadow-lg transition-all flex flex-col h-full`}>
-                  <div className="p-2 bg-green-50 border-b border-green-100 flex justify-between items-center">
-                    <span className="text-xs font-medium text-green-700">简单海报</span>
-                    <div className="flex space-x-1">
-                      <button
-                        onClick={() => openPreview("simple")}
-                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-0.5 rounded flex items-center"
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        预览
-                      </button>
-                      <button
-                        onClick={() => handleTemplateSelect("simple", "simple")}
-                        className={`text-xs ${selectedTemplate === "simple" ? "bg-green-600" : "bg-green-500"} text-white px-2 py-0.5 rounded flex items-center`}
-                      >
-                        {selectedTemplate === "simple" ? "已选择" : "选择"}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="p-3 flex-grow flex justify-center items-center">
-                    <div className="w-full h-full flex items-center justify-center">
-                      {cardData && (
-                        <div className="transform scale-90 origin-center">
-                          <Card
-                            data={{
-                              ...cardData,
-                              layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
-                            }}
-                            platformRatio="3:4"
-                            posterFormat="simple"
-                            hideNavigation={true}
-                          />
-                          {/* 底部按钮栏 */}
-                          <div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
-                            <Link
-                              href={getDetailLink("simple")}
-                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
-                            >
-                              <span className="text-xs">编辑</span>
-                            </Link>
-                            <button
-                              onClick={() => alert('下载功能将在后续版本中实现')}
-                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
-                            >
-                              <span className="text-xs">下载</span>
-                            </button>
-                            <button
-                              onClick={() => alert('更多功能将在后续版本中实现')}
-                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                              <span className="text-xs">⋮</span>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 复杂海报模板 */}
-                <div className={`bg-white rounded-lg shadow-md overflow-hidden border ${selectedTemplate === "complex" ? "border-purple-400 ring-2 ring-purple-200" : "border-gray-200"} hover:shadow-lg transition-all flex flex-col h-full`}>
-                  <div className="p-2 bg-purple-50 border-b border-purple-100 flex justify-between items-center">
-                    <span className="text-xs font-medium text-purple-700">复杂海报</span>
-                    <div className="flex space-x-1">
-                      <button
-                        onClick={() => openPreview("complex")}
-                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-0.5 rounded flex items-center"
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        预览
-                      </button>
-                      <button
-                        onClick={() => handleTemplateSelect("complex", "complex")}
-                        className={`text-xs ${selectedTemplate === "complex" ? "bg-purple-600" : "bg-purple-500"} text-white px-2 py-0.5 rounded flex items-center`}
-                      >
-                        {selectedTemplate === "complex" ? "已选择" : "选择"}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="p-3 flex-grow flex justify-center items-center">
-                    <div className="w-full h-full flex items-center justify-center">
-                      {cardData && (
-                        <div className="transform scale-90 origin-center">
-                          <Card
-                            data={{
-                              ...cardData,
-                              layout: { type: "carousel", columns: 1, alignment: "center", spacing: "medium", itemStyle: "card" }
-                            }}
-                            platformRatio="3:4"
-                            posterFormat="complex"
-                            hideNavigation={true}
-                          />
-                          {/* 底部按钮栏 */}
-                          <div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
-                            <Link
-                              href={getDetailLink("complex")}
-                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
-                            >
-                              <span className="text-xs">编辑</span>
-                            </Link>
-                            <button
-                              onClick={() => alert('下载功能将在后续版本中实现')}
-                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
-                            >
-                              <span className="text-xs">下载</span>
-                            </button>
-                            <button
-                              onClick={() => alert('更多功能将在后续版本中实现')}
-                              className="flex-1 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                              <span className="text-xs">⋮</span>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 下载按钮 */}
-              <div className="mt-4 flex justify-center">
-                <button
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-full text-sm text-white transition-colors inline-flex items-center"
-                  onClick={() => {
-                    // 这里可以添加下载功能
-                    alert('下载功能将在后续版本中实现');
-                  }}
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  下载选中模板
-                </button>
               </div>
             </div>
           )}
