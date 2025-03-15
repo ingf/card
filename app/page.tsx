@@ -2,11 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/Card";
-import { CardSchema } from "@/lib/schemas/card";
-import type { Card as CardType, Layout } from "@/lib/schemas/card";
+import type { Card as CardType, Layout, CardType as CardTypeEnum } from "@/lib/schemas/card";
 import { Sparkles, Loader2, Send, Clock, Download, Eye, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { getCardByKeyword } from "@/lib/mockData";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
@@ -26,16 +24,17 @@ export default function Home() {
     }
     return [];
   });
-  const [templates, setTemplates] = useState<("list" | "steps" | "basic" | "step" | "list" | "stat" | "media" | "location" | "keyValue" | "template")[]>([
-    "basic",       // 基础卡片项
-    "step",        // 步骤卡片项
-    "list",        // 列表卡片项
-    "stat",        // 统计数据卡片项
-    "media",       // 媒体卡片项
-    "location",    // 位置卡片项
-    "keyValue",    // 键值对卡片项
-    "template",    // 模板文本卡片项
 
+  // 修改模板类型，确保与 CardTypeEnum 一致
+  const [templates, setTemplates] = useState<CardTypeEnum[]>([
+    "basic",       // 基础卡片
+    "list",        // 列表卡片
+    "steps",       // 步骤卡片
+    "stats",       // 统计卡片
+    "media",       // 媒体卡片
+    "location",    // 位置卡片
+    "keyValue",    // 键值对卡片
+    "template",    // 模板卡片
   ]);
 
   // 添加输入框引用，用于自动聚焦
@@ -74,8 +73,20 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      // 使用模拟数据
-      const data = getCardByKeyword(input);
+      // 从 API 获取数据，而不是使用模拟数据
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: input }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API 请求失败: ${response.status}`);
+      }
+
+      const data = await response.json();
 
       // 设置卡片数据
       setCardData(data);
