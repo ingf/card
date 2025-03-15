@@ -463,7 +463,7 @@ export function Card({ data, width = 375, height = 500, platformRatio = "default
       style={{
         width: width ? `${width}px` : ratio.width,
         height: height ? `${height}px` : ratio.height,
-        boxShadow: getTemplateById(posterFormat).style.boxShadow
+        // boxShadow: getTemplateById(posterFormat).style.boxShadow
       }}
     >
       {/* 根据模板样式渲染不同布局 */}

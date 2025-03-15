@@ -6,7 +6,7 @@ import { CardSchema } from "@/lib/schemas/card";
 import type { Card as CardType, Layout } from "@/lib/schemas/card";
 import { Sparkles, Loader2, Send, Clock, Download, Eye, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { getCardByKeyword, cardTemplates, getTemplateById } from "@/lib/mockData";
+import { getCardByKeyword, getTemplateById } from "@/lib/mockData";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
@@ -19,7 +19,7 @@ export default function Home() {
   });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("standard");
+  const [selectedTemplate, setSelectedTemplate] = useState<"list" | "steps">("list");
   const [inputHistory, setInputHistory] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
       const savedHistory = sessionStorage.getItem('inputHistory');
@@ -27,7 +27,7 @@ export default function Home() {
     }
     return [];
   });
-  const [activeTemplates, setActiveTemplates] = useState<string[]>(["standard", "headline", "blog", "marketing"]);
+  const [templates, setTemplates] = useState<("list" | "steps")[]>(["list", "steps"]);
 
   // 添加输入框引用，用于自动聚焦
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -88,20 +88,6 @@ export default function Home() {
     setInput(historyItem);
     if (inputRef.current) {
       inputRef.current.focus();
-    }
-  };
-
-  // 修改模板选择函数，使其可以切换模板的激活状态
-  const handleTemplateSelect = (template: string) => {
-    setSelectedTemplate(template);
-
-    // 如果模板已经在激活列表中，则移除它；否则添加它
-    if (activeTemplates.includes(template)) {
-      if (activeTemplates.length > 1) { // 确保至少有一个激活的模板
-        setActiveTemplates(prev => prev.filter(t => t !== template));
-      }
-    } else {
-      setActiveTemplates(prev => [...prev, template]);
     }
   };
 
@@ -202,8 +188,7 @@ export default function Home() {
               <div className="p-4">
                 {cardData && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {activeTemplates.map((templateId, index) => {
-                      const template = getTemplateById(templateId);
+                    {templates.map((templateId, index) => {
                       return (
                         <div
                           key={templateId}
@@ -211,17 +196,11 @@ export default function Home() {
                           style={{
                             aspectRatio: "3/4",
                             maxWidth: "100%",
-                            backgroundColor: template.style.backgroundColor,
-                            backgroundImage: template.style.backgroundImage,
-                            border: template.style.border,
+                            border: '1px solid #efefef',
                             borderRadius: "12px",
-                            boxShadow: template.style.boxShadow
+                            boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)'
                           }}
                         >
-                          {/* <div className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-full z-10 text-[10px] ${template.style.labelStyle}`}>
-                            {template.name}
-                          </div> */}
-
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center z-10">
                             <div className="flex gap-2 flex-col">
                               <Link
@@ -245,7 +224,8 @@ export default function Home() {
                             <Card
                               data={{
                                 ...cardData,
-                                items: templateId === "standard" ? cardData.items.slice(0, 1) : cardData.items,
+                                // type={ templateId },
+                                items: templateId === "list" ? cardData.items.slice(0, 1) : cardData.items,
                                 layout: {
                                   type: "carousel",
                                   columns: 1,
@@ -257,11 +237,12 @@ export default function Home() {
                                   showIcons: false,
                                   animation: "slide"
                                 },
+                                type: templateId,
                                 theme: {
                                   ...cardData.theme,
                                   backgroundColor: "transparent",
-                                  primaryColor: template.style.titleColor,
-                                  textColor: template.style.titleColor,
+                                  // primaryColor: template.style.titleColor,
+                                  // textColor: template.style.titleColor,
                                   borderRadius: "0px",
                                   cardStyle: "flat"
                                 }

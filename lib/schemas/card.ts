@@ -113,18 +113,8 @@ export const ThemeSchema = z.object({
 
 // 定义卡片类型
 export const CardTypeSchema = z.enum([
-  "info", // 普通信息卡片
   "list", // 列表卡片
   "steps", // 步骤卡片
-  "comparison", // 比较卡片
-  "faq", // 问答卡片
-  "interview", // 面试卡片
-  "insurance", // 保险信息卡片
-  "learning", // 学习方法卡片
-  "travel", // 旅行指南卡片
-  "timeline", // 时间线卡片
-  "stats", // 统计数据卡片
-  "custom" // 自定义卡片
 ])
 
 // 定义整个卡片的数据结构
@@ -145,7 +135,6 @@ export const CardSchema = z.object({
     })).optional(),
   }).optional(),
   // 新增字段
-  type: CardTypeSchema.optional().default("info"), // 卡片类型
   header: z.object({
     icon: IconSchema.optional(),
     visualElement: VisualElementSchema.optional(),
