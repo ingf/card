@@ -105,12 +105,6 @@ export default function Home() {
     }
   };
 
-  // 生成详情页链接
-  const getDetailLink = (template: string) => {
-    if (!cardData) return "#";
-    return `/detail?template=${template}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}`;
-  };
-
   const clearCardData = () => {
     setCardData(null);
     sessionStorage.removeItem('cardData');

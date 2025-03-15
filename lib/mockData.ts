@@ -53,6 +53,7 @@ export const healthyEatingCard: Card = {
     animation: "fade",
     accentColor: "#8BC34A",
     fontFamily: "'Noto Sans SC', sans-serif",
+    colorScheme: "light",
     headerStyle: {
       backgroundColor: "#F1F8E9",
       textColor: "#33691E",
