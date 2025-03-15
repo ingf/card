@@ -26,7 +26,17 @@ export default function Home() {
     }
     return [];
   });
-  const [templates, setTemplates] = useState<("list" | "steps")[]>(["list", "steps"]);
+  const [templates, setTemplates] = useState<("list" | "steps" | "basic" | "step" | "list" | "stat" | "media" | "location" | "keyValue" | "template")[]>([
+    "basic",       // 基础卡片项
+    "step",        // 步骤卡片项
+    "list",        // 列表卡片项
+    "stat",        // 统计数据卡片项
+    "media",       // 媒体卡片项
+    "location",    // 位置卡片项
+    "keyValue",    // 键值对卡片项
+    "template",    // 模板文本卡片项
+
+  ]);
 
   // 添加输入框引用，用于自动聚焦
   const inputRef = useRef<HTMLTextAreaElement>(null);
