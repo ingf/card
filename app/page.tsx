@@ -8,13 +8,16 @@ import Link from "next/link";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
-  const [cardData, setCardData] = useState<CardType | null>(() => {
+  // 将 cardData 改为数组，存储不同模板的数据
+  const [cardDataMap, setCardDataMap] = useState<Partial<Record<CardTypeEnum, CardType | null>>>(() => {
     if (typeof window !== 'undefined') {
-      const savedCardData = sessionStorage.getItem('cardData');
-      return savedCardData ? JSON.parse(savedCardData) : null;
+      const savedCardData = sessionStorage.getItem('cardDataMap');
+      return savedCardData ? JSON.parse(savedCardData) : {};
     }
-    return null;
+    return {};
   });
+  // 添加一个状态记录当前正在加载的模板
+  const [loadingTemplates, setLoadingTemplates] = useState<CardTypeEnum[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [inputHistory, setInputHistory] = useState<string[]>(() => {
@@ -47,19 +50,58 @@ export default function Home() {
     if (inputRef.current && !isLoading) {
       inputRef.current.focus();
     }
-  }, [isLoading, cardData]);
+  }, [isLoading, cardDataMap]);
 
   useEffect(() => {
-    if (cardData) {
-      sessionStorage.setItem('cardData', JSON.stringify(cardData));
+    if (Object.keys(cardDataMap).length > 0) {
+      sessionStorage.setItem('cardDataMap', JSON.stringify(cardDataMap));
     }
-  }, [cardData]);
+  }, [cardDataMap]);
 
   useEffect(() => {
     if (inputHistory.length > 0) {
       sessionStorage.setItem('inputHistory', JSON.stringify(inputHistory));
     }
   }, [inputHistory]);
+
+  // 判断是否有任何卡片数据
+  const hasAnyCardData = Object.values(cardDataMap).some(data => data !== null);
+
+  // 获取单个模板的数据
+  const fetchTemplateData = async (templateType: CardTypeEnum, userPrompt: string) => {
+    setLoadingTemplates(prev => [...prev, templateType]);
+
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: userPrompt,
+          type: templateType
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API 请求失败: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // 更新特定模板的数据
+      setCardDataMap(prev => ({
+        ...prev,
+        [templateType]: data
+      }));
+
+    } catch (e) {
+      console.error(`Error fetching ${templateType} template:`, e);
+      // 保持错误状态但不阻止其他模板加载
+    } finally {
+      setLoadingTemplates(prev => prev.filter(t => t !== templateType));
+    }
+  };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,28 +113,21 @@ export default function Home() {
     }
 
     setIsLoading(true);
+    // 清空之前的卡片数据
+    setCardDataMap({} as Partial<Record<CardTypeEnum, CardType | null>>);
 
     try {
-      // 从 API 获取数据，而不是使用模拟数据
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt: input }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API 请求失败: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // 设置卡片数据
-      setCardData(data);
-      setError("");
       // 添加到历史记录
       setInputHistory(prev => [input, ...prev]);
+
+      // 并行获取所有模板的数据
+      const fetchPromises = templates.map(templateType =>
+        fetchTemplateData(templateType, input)
+      );
+
+      // 等待所有请求完成
+      await Promise.all(fetchPromises);
+
       // 清空输入框
       setInput("");
     } catch (e) {
@@ -112,8 +147,8 @@ export default function Home() {
   };
 
   const clearCardData = () => {
-    setCardData(null);
-    sessionStorage.removeItem('cardData');
+    setCardDataMap({} as Partial<Record<CardTypeEnum, CardType | null>>);
+    sessionStorage.removeItem('cardDataMap');
   };
 
   return (
@@ -136,7 +171,7 @@ export default function Home() {
           className="flex-grow overflow-y-auto px-4 py-6 space-y-6"
         >
           {/* 欢迎信息 */}
-          {!cardData && !isLoading && (
+          {!hasAnyCardData && !isLoading && (
             <div className="max-w-3xl mx-auto text-center py-8">
               <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="h-10 w-10 text-blue-400" />
@@ -161,7 +196,7 @@ export default function Home() {
           )}
 
           {/* 生成的卡片内容 */}
-          {cardData && (
+          {hasAnyCardData && (
             <div className="max-w-6xl mx-auto">
               {/* 用户输入显示 */}
               <div className="bg-blue-50 rounded-lg p-3 mb-4 border border-blue-100">
@@ -182,9 +217,18 @@ export default function Home() {
                     AI
                   </div>
                   <div className="flex-grow">
-                    <h3 className="text-lg font-bold text-gray-800 mb-1">{cardData.title}</h3>
-                    {cardData.subtitle && (
-                      <p className="text-gray-600 text-sm">{cardData.subtitle}</p>
+                    {/* 使用第一个有效的卡片数据显示标题 */}
+                    {Object.values(cardDataMap).find(data => data !== null) && (
+                      <>
+                        <h3 className="text-lg font-bold text-gray-800 mb-1">
+                          {Object.values(cardDataMap).find(data => data !== null)?.title}
+                        </h3>
+                        {Object.values(cardDataMap).find(data => data !== null)?.subtitle && (
+                          <p className="text-gray-600 text-sm">
+                            {Object.values(cardDataMap).find(data => data !== null)?.subtitle}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -193,9 +237,9 @@ export default function Home() {
               {/* 替换清除按钮区域 */}
               <div className="mb-4 flex justify-between items-center">
                 <div className="text-sm text-gray-500">
-                  {cardData ? "已生成卡片，显示不同样式效果" : "尚未生成卡片"}
+                  {hasAnyCardData ? "已生成卡片，显示不同样式效果" : "尚未生成卡片"}
                 </div>
-                {cardData && (
+                {hasAnyCardData && (
                   <button
                     onClick={clearCardData}
                     className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm transition-colors"
@@ -206,9 +250,12 @@ export default function Home() {
               </div>
 
               <div className="p-4">
-                {cardData && (
+                {hasAnyCardData && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {templates.map((templateId, index) => {
+                      const templateData = cardDataMap[templateId];
+                      const isLoading = loadingTemplates.includes(templateId);
+
                       return (
                         <div
                           key={templateId}
@@ -221,58 +268,45 @@ export default function Home() {
                             boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)'
                           }}
                         >
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center z-10">
-                            <div className="flex gap-2 flex-col">
-                              <Link
-                                href={`/preview?template=${templateId}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}-${index}`}
-                                className="bg-white hover:bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                预览
-                              </Link>
-                              <Link
-                                href={`/detail?template=${templateId}&title=${encodeURIComponent(cardData.title)}&id=${Date.now()}-${index}`}
-                                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
-                              >
-                                <ExternalLink className="h-4 w-4 mr-2" />
-                                使用
-                              </Link>
+                          {isLoading ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                              <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
                             </div>
-                          </div>
+                          ) : templateData ? (
+                            <>
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center z-10">
+                                <div className="flex gap-2 flex-col">
+                                  <Link
+                                    href={`/preview?template=${templateId}&title=${encodeURIComponent(templateData.title)}&id=${Date.now()}-${index}`}
+                                    className="bg-white hover:bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
+                                  >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    预览
+                                  </Link>
+                                  <Link
+                                    href={`/detail?template=${templateId}&title=${encodeURIComponent(templateData.title)}&id=${Date.now()}-${index}`}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
+                                  >
+                                    <ExternalLink className="h-4 w-4 mr-2" />
+                                    使用
+                                  </Link>
+                                </div>
+                              </div>
 
-                          <div className="w-full h-full">
-                            <Card
-                              data={{
-                                ...cardData,
-                                items: templateId === "list" ? cardData.items.slice(0, 1) : cardData.items,
-                                layout: {
-                                  type: "carousel",
-                                  columns: 1,
-                                  alignment: "center",
-                                  spacing: "small",
-                                  itemStyle: "card",
-                                  showDividers: false,
-                                  showNumbers: true,
-                                  showIcons: false,
-                                  animation: "slide"
-                                },
-                                type: templateId,
-                                // theme: {
-                                //   ...cardData.theme,
-                                //   backgroundColor: "transparent",
-                                //   // primaryColor: template.style.titleColor,
-                                //   // textColor: template.style.titleColor,
-                                //   borderRadius: "0px",
-                                //   cardStyle: "flat"
-                                // }
-                              }}
-                              // width={1242}
-                              // height={1659}
-                              posterFormat={templateId}
-                              hideNavigation={true}
-                              className="h-full w-full"
-                            />
-                          </div>
+                              <div className="w-full h-full">
+                                <Card
+                                  data={templateData}
+                                  posterFormat={templateId}
+                                  hideNavigation={true}
+                                  className="h-full w-full"
+                                />
+                              </div>
+                            </>
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 text-gray-400 text-sm">
+                              {templateId} 模板加载失败
+                            </div>
+                          )}
                         </div>
                       );
                     })}
