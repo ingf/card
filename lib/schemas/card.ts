@@ -207,7 +207,7 @@ export const BaseCardSchema = z.object({
   title: z.string(), // 主标题
   subtitle: z.string().optional(), // 副标题
   description: z.string().optional(), // 卡片整体描述
-  theme: ThemeSchema,
+  // theme: ThemeSchema,
   footer: z.object({
     text: z.string().optional(),
     showAttribution: z.boolean().optional().default(false),
@@ -315,14 +315,14 @@ export const TemplateCardSchema = BaseCardSchema.extend({
 
 // 合并所有卡片类型
 export const CardSchema = z.discriminatedUnion("type", [
-  BasicCardSchema,
+  // BasicCardSchema,
   ListCardSchema,
-  StepsCardSchema,
-  StatsCardSchema,
-  MediaCardSchema,
-  LocationCardSchema,
-  KeyValueCardSchema,
-  TemplateCardSchema,
+  // StepsCardSchema,
+  // StatsCardSchema,
+  // MediaCardSchema,
+  // LocationCardSchema,
+  // KeyValueCardSchema,
+  // TemplateCardSchema,
 ])
 
 export type Icon = z.infer<typeof IconSchema>

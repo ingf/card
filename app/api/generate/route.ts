@@ -1,7 +1,7 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { streamObject } from "ai";
 
-import { CardSchema } from "@/lib/schemas/card";
+import { CardSchema, ListCardSchema } from "@/lib/schemas/card";
 
 const google = createGoogleGenerativeAI({
   // custom settings
