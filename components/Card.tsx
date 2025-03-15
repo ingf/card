@@ -6,6 +6,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import CardFactory from "./cards/CardFactory1";
 import { getTemplateById } from '@/lib/mockData';
 
+// 卡片模板类型
+export const CARD_TEMPLATES = ["list", "steps"] as const;
+export type CardTemplate = typeof CARD_TEMPLATES[number];
+
 interface CardProps {
   data: CardType;
   platformRatio?: string;
@@ -257,8 +261,8 @@ const renderCardByType = (data: CardType, currentIndex: number, posterFormat: st
     //   return renderFaqCard(data, currentItem, currentIndex, posterFormat);
     // case "timeline":
     //   return renderTimelineCard(data, currentItem, currentIndex, posterFormat);
-    // default:
-    //   return renderDefaultCard(data, currentItem, currentIndex, posterFormat);
+    default:
+      return renderListCard(data, currentItem, currentIndex, posterFormat);
   }
 };
 
@@ -422,6 +426,17 @@ const renderStepsCard = (data: CardType, item: CardItemType, index: number, post
 
 // 其他类型的卡片布局...
 
+/**
+ * 使用示例:
+ * 
+ * ```tsx
+ * // 使用 CARD_TEMPLATES 常量
+ * const [activeTemplates, setActiveTemplates] = useState<CardTemplate[]>(CARD_TEMPLATES);
+ * 
+ * // 使用 CARD_TYPES 常量
+ * const [activeCardTypes, setActiveCardTypes] = useState<CardTypeEnum[]>(CARD_TYPES);
+ * ```
+ */
 export function Card({ data, width = 375, height = 500, platformRatio = "default", posterFormat = "standard", hideNavigation = false, className = "" }: CardProps & { width?: number, height?: number, className?: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const totalItems = data.items.length;
