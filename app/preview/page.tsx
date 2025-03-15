@@ -2,28 +2,32 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Card as CardType } from "@/lib/schemas/card";
+import { Card as CardType, CardType as CardTypeEnum } from "@/lib/schemas/card";
 import { ArrowLeft, Download, Share2 } from "lucide-react";
 import Link from "next/link";
-import { getCardByKeyword } from "@/lib/mockData";
 import { Card } from "@/components/Card";
 
 export default function PreviewPage() {
   const searchParams = useSearchParams();
-  const template: any = searchParams.get("template") || "list";
+  const template = searchParams.get("template") as CardTypeEnum || "list";
   const title = searchParams.get("title") || "信息卡片";
 
   const [cardData, setCardData] = useState<CardType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 模拟从API获取数据
+  // 从 localStorage 获取数据
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // 这里应该是从API获取数据，现在我们使用模拟数据
-        const mockData = getCardByKeyword(title);
-        setCardData(mockData);
+        // 从 localStorage 获取数据
+        const storedData = localStorage.getItem(`preview_card_${template}`);
+
+        if (storedData) {
+          setCardData(JSON.parse(storedData));
+        } else {
+          console.error("未找到预览数据");
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -32,7 +36,7 @@ export default function PreviewPage() {
     };
 
     fetchData();
-  }, [title]);
+  }, [template]);
 
   // 分享功能
   const handleShare = () => {
@@ -101,11 +105,7 @@ export default function PreviewPage() {
               {cardData.items.map((item, index) => (
                 <div key={index} className="transform scale-100 origin-top">
                   <Card
-                    data={{
-                      ...cardData,
-                      type: template as CardType["type"],
-                      items: [{ ...item, id: index + 1 }], // 设置id为当前索引+1，确保序号正确递增
-                    }}
+                    data={cardData}
                     posterFormat={template}
                     hideNavigation={true}
                     className="w-full shadow-lg"
@@ -123,7 +123,7 @@ export default function PreviewPage() {
                     <a
                       href={cardData.footer.links[0].url}
                       className="flex items-center gap-1 hover:underline"
-                      style={{ color: cardData.theme.primaryColor }}
+                      style={{ color: '#FF9966' }}
                     >
                       {cardData.footer.links[0].text}
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"

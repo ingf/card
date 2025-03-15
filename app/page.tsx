@@ -64,6 +64,15 @@ export default function Home() {
     }
   }, [inputHistory]);
 
+  // 保存卡片数据到 localStorage 以便预览页面使用
+  const saveCardDataForPreview = (templateId: CardTypeEnum, data: CardType) => {
+    try {
+      localStorage.setItem(`preview_card_${templateId}`, JSON.stringify(data));
+    } catch (error) {
+      console.error("保存预览数据失败:", error);
+    }
+  };
+
   // 判断是否有任何卡片数据
   const hasAnyCardData = Object.values(cardDataMap).some(data => data !== null);
 
@@ -279,6 +288,7 @@ export default function Home() {
                                   <Link
                                     href={`/preview?template=${templateId}&title=${encodeURIComponent(templateData.title)}&id=${Date.now()}-${index}`}
                                     className="bg-white hover:bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
+                                    onClick={() => saveCardDataForPreview(templateId, templateData)}
                                   >
                                     <Eye className="h-4 w-4 mr-2" />
                                     预览
@@ -286,6 +296,7 @@ export default function Home() {
                                   <Link
                                     href={`/detail?template=${templateId}&title=${encodeURIComponent(templateData.title)}&id=${Date.now()}-${index}`}
                                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
+                                    onClick={() => saveCardDataForPreview(templateId, templateData)}
                                   >
                                     <ExternalLink className="h-4 w-4 mr-2" />
                                     使用
