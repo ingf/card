@@ -315,14 +315,14 @@ export const TemplateCardSchema = BaseCardSchema.extend({
 
 // 合并所有卡片类型
 export const CardSchema = z.discriminatedUnion("type", [
-  // BasicCardSchema,
+  BasicCardSchema,
   ListCardSchema,
-  // StepsCardSchema,
-  // StatsCardSchema,
-  // MediaCardSchema,
-  // LocationCardSchema,
-  // KeyValueCardSchema,
-  // TemplateCardSchema,
+  StepsCardSchema,
+  StatsCardSchema,
+  MediaCardSchema,
+  LocationCardSchema,
+  KeyValueCardSchema,
+  TemplateCardSchema,
 ])
 
 export type Icon = z.infer<typeof IconSchema>

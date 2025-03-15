@@ -257,14 +257,14 @@ export default function Home() {
                                   animation: "slide"
                                 },
                                 type: templateId,
-                                theme: {
-                                  ...cardData.theme,
-                                  backgroundColor: "transparent",
-                                  // primaryColor: template.style.titleColor,
-                                  // textColor: template.style.titleColor,
-                                  borderRadius: "0px",
-                                  cardStyle: "flat"
-                                }
+                                // theme: {
+                                //   ...cardData.theme,
+                                //   backgroundColor: "transparent",
+                                //   // primaryColor: template.style.titleColor,
+                                //   // textColor: template.style.titleColor,
+                                //   borderRadius: "0px",
+                                //   cardStyle: "flat"
+                                // }
                               }}
                               // width={1242}
                               // height={1659}
