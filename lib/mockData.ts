@@ -190,7 +190,6 @@ export const effectiveLearningCard: Card = {
     showIcons: true,
     animation: "slide"
   },
-  type: "list"
 };
 
 // 时间管理卡片数据
@@ -249,7 +248,6 @@ export const timeManagementCard: Card = {
     showIcons: true,
     animation: "slide"
   },
-  type: "list"
 };
 
 // 职场沟通卡片数据
@@ -308,7 +306,6 @@ export const workplaceCommunicationCard: Card = {
     showIcons: true,
     animation: "slide"
   },
-  type: "list"
 };
 
 // 创意思维卡片数据
@@ -367,7 +364,6 @@ export const creativeThinkingCard: Card = {
     showIcons: true,
     animation: "slide"
   },
-  type: "list"
 };
 
 // 导出所有卡片数据的集合
@@ -405,12 +401,4 @@ export function getCardByKeyword(keyword: string): Card {
 
   // 默认返回健康饮食卡片
   return healthyEatingCard;
-}
-
-// 卡片模板配置
-
-
-// 根据模板ID获取模板配置
-export function getTemplateById(templateId: string) {
-  return cardTemplates.find(template => template.id === templateId) || cardTemplates[0];
 }

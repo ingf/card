@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Card as CardType } from "@/lib/schemas/card";
 import { ArrowLeft, Download, Share2 } from "lucide-react";
 import Link from "next/link";
-import { getCardByKeyword, getTemplateById } from "@/lib/mockData";
+import { getCardByKeyword } from "@/lib/mockData";
 import { Card } from "@/components/Card";
 
 export default function PreviewPage() {
@@ -51,8 +51,6 @@ export default function PreviewPage() {
     }
   };
 
-  // 获取模板样式
-  const templateStyle = getTemplateById(template).style;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex flex-col">
@@ -90,7 +88,7 @@ export default function PreviewPage() {
           <div className="max-w-3xl mx-auto">
             {/* 卡片标题区域 */}
             <div className="mb-6 text-center">
-              <h2 className="text-2xl font-bold mb-2" style={{ color: templateStyle.titleColor || '#000' }}>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: '#000' }}>
                 {cardData.title}
               </h2>
               {cardData.subtitle && (
@@ -106,11 +104,6 @@ export default function PreviewPage() {
                     data={{
                       ...cardData,
                       items: [{ ...item, id: index + 1 }], // 设置id为当前索引+1，确保序号正确递增
-                      layout: {
-                        ...cardData.layout,
-                        type: "carousel",
-                        columns: 1,
-                      }
                     }}
                     posterFormat={template}
                     hideNavigation={true}
