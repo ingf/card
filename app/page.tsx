@@ -257,18 +257,13 @@ export default function Home() {
                                   showIcons: false,
                                   animation: "slide"
                                 },
-                                style: {
+                                theme: {
+                                  ...cardData.theme,
                                   backgroundColor: "transparent",
-                                  borderColor: "transparent",
-                                  borderWidth: 0,
+                                  primaryColor: template.style.titleColor,
+                                  textColor: template.style.titleColor,
                                   borderRadius: "0px",
-                                  padding: "8px",
-                                  titleColor: template.style.titleColor,
-                                  titleSize: template.style.titleSize,
-                                  itemNumberColor: template.style.itemNumberColor,
-                                  itemNumberBackground: template.style.itemNumberBackground,
-                                  contentFontSize: template.style.contentFontSize,
-                                  lineHeight: template.style.lineHeight
+                                  cardStyle: "flat"
                                 }
                               }}
                               // width={1242}
