@@ -135,6 +135,7 @@ export const CardSchema = z.object({
     })).optional(),
   }).optional(),
   // 新增字段
+  type: CardTypeSchema.optional(), // 卡片类型
   header: z.object({
     icon: IconSchema.optional(),
     visualElement: VisualElementSchema.optional(),

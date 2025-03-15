@@ -3,8 +3,6 @@ import { cn } from '@/lib/utils'
 import { useState, useCallback, useEffect } from 'react'
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import CardFactory from "./cards/CardFactory1";
-import { getTemplateById } from '@/lib/mockData';
 
 // 卡片模板类型
 export const CARD_TEMPLATES = ["list", "steps"] as const;

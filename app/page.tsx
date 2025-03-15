@@ -6,7 +6,7 @@ import { CardSchema } from "@/lib/schemas/card";
 import type { Card as CardType, Layout } from "@/lib/schemas/card";
 import { Sparkles, Loader2, Send, Clock, Download, Eye, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { getCardByKeyword, getTemplateById } from "@/lib/mockData";
+import { getCardByKeyword } from "@/lib/mockData";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
@@ -19,7 +19,6 @@ export default function Home() {
   });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<"list" | "steps">("list");
   const [inputHistory, setInputHistory] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
       const savedHistory = sessionStorage.getItem('inputHistory');
@@ -224,7 +223,6 @@ export default function Home() {
                             <Card
                               data={{
                                 ...cardData,
-                                // type={ templateId },
                                 items: templateId === "list" ? cardData.items.slice(0, 1) : cardData.items,
                                 layout: {
                                   type: "carousel",

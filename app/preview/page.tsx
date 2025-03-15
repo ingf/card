@@ -10,7 +10,7 @@ import { Card } from "@/components/Card";
 
 export default function PreviewPage() {
   const searchParams = useSearchParams();
-  const template = searchParams.get("template") || "standard";
+  const template: any = searchParams.get("template") || "list";
   const title = searchParams.get("title") || "信息卡片";
 
   const [cardData, setCardData] = useState<CardType | null>(null);
@@ -103,6 +103,7 @@ export default function PreviewPage() {
                   <Card
                     data={{
                       ...cardData,
+                      type: template as CardType["type"],
                       items: [{ ...item, id: index + 1 }], // 设置id为当前索引+1，确保序号正确递增
                     }}
                     posterFormat={template}
