@@ -5,30 +5,16 @@ import { Card } from "@/components/Card";
 import type { Card as CardType, Layout, CardType as CardTypeEnum } from "@/lib/schemas/card";
 import { Sparkles, Loader2, Send, Clock, Download, Eye, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { useSessionStorage } from "@/lib/hooks/useSessionStorage";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
-  // 将 cardData 改为数组，存储不同模板的数据
-  const [cardDataMap, setCardDataMap] = useState<Partial<Record<CardTypeEnum, CardType | null>>>(() => {
-    if (typeof window !== 'undefined') {
-      const savedCardData = sessionStorage.getItem('cardDataMap');
-      return savedCardData ? JSON.parse(savedCardData) : {};
-    }
-    return {};
-  });
-  // 添加一个状态记录当前正在加载的模板
+  const [cardDataMap, setCardDataMap] = useSessionStorage<Partial<Record<CardTypeEnum, CardType | null>>>('cardDataMap', {});
   const [loadingTemplates, setLoadingTemplates] = useState<CardTypeEnum[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [inputHistory, setInputHistory] = useState<string[]>(() => {
-    if (typeof window !== 'undefined') {
-      const savedHistory = sessionStorage.getItem('inputHistory');
-      return savedHistory ? JSON.parse(savedHistory) : [];
-    }
-    return [];
-  });
+  const [inputHistory, setInputHistory] = useSessionStorage<string[]>('inputHistory', []);
 
-  // 修改模板类型，确保与 CardTypeEnum 一致
   const [templates, setTemplates] = useState<CardTypeEnum[]>([
     "basic",       // 基础卡片
     "list",        // 列表卡片
@@ -36,16 +22,13 @@ export default function Home() {
     "stats",       // 统计卡片
     "media",       // 媒体卡片
     "location",    // 位置卡片
-    "keyValue",    // 键值对卡片
-    "template",    // 模板卡片
+    // "keyValue",    // 键值对卡片
+    // "template",    // 模板卡片
   ]);
 
-  // 添加输入框引用，用于自动聚焦
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  // 添加内容区域引用，用于自动滚动到底部
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // 自动聚焦输入框
   useEffect(() => {
     if (inputRef.current && !isLoading) {
       inputRef.current.focus();
@@ -64,7 +47,20 @@ export default function Home() {
     }
   }, [inputHistory]);
 
-  // 保存卡片数据到 localStorage 以便预览页面使用
+  useEffect(() => {
+    // 从 sessionStorage 读取数据
+    const savedCardData = sessionStorage.getItem('cardDataMap');
+    const savedHistory = sessionStorage.getItem('inputHistory');
+
+    if (savedCardData) {
+      setCardDataMap(JSON.parse(savedCardData));
+    }
+
+    if (savedHistory) {
+      setInputHistory(JSON.parse(savedHistory));
+    }
+  }, []); // 仅在组件挂载时执行一次
+
   const saveCardDataForPreview = (templateId: CardTypeEnum, data: CardType) => {
     try {
       localStorage.setItem(`preview_card_${templateId}`, JSON.stringify(data));
@@ -73,10 +69,8 @@ export default function Home() {
     }
   };
 
-  // 判断是否有任何卡片数据
   const hasAnyCardData = Object.values(cardDataMap).some(data => data !== null);
 
-  // 获取单个模板的数据
   const fetchTemplateData = async (templateType: CardTypeEnum, userPrompt: string) => {
     setLoadingTemplates(prev => [...prev, templateType]);
 
@@ -98,15 +92,13 @@ export default function Home() {
 
       const data = await response.json();
 
-      // 更新特定模板的数据
       setCardDataMap(prev => ({
         ...prev,
-        [templateType]: data
+        [templateType]: JSON.parse(data.data)
       }));
 
     } catch (e) {
       console.error(`Error fetching ${templateType} template:`, e);
-      // 保持错误状态但不阻止其他模板加载
     } finally {
       setLoadingTemplates(prev => prev.filter(t => t !== templateType));
     }
@@ -122,22 +114,17 @@ export default function Home() {
     }
 
     setIsLoading(true);
-    // 清空之前的卡片数据
     setCardDataMap({} as Partial<Record<CardTypeEnum, CardType | null>>);
 
     try {
-      // 添加到历史记录
       setInputHistory(prev => [input, ...prev]);
 
-      // 并行获取所有模板的数据
       const fetchPromises = templates.map(templateType =>
         fetchTemplateData(templateType, input)
       );
 
-      // 等待所有请求完成
       await Promise.all(fetchPromises);
 
-      // 清空输入框
       setInput("");
     } catch (e) {
       console.error("Error:", e);
@@ -147,7 +134,6 @@ export default function Home() {
     }
   };
 
-  // 从历史记录中选择输入
   const selectHistoryInput = (historyItem: string) => {
     setInput(historyItem);
     if (inputRef.current) {
@@ -162,7 +148,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex flex-col">
-      {/* 标题区域 */}
       <div className="text-center py-4 border-b border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm">
         <div className="inline-flex items-center justify-center">
           <Sparkles className="h-6 w-6 text-blue-500 mr-2" />
@@ -172,14 +157,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 主内容区域 */}
       <div className="flex-grow flex flex-col overflow-hidden">
-        {/* 聊天内容区域 */}
         <div
           ref={contentRef}
           className="flex-grow overflow-y-auto px-4 py-6 space-y-6"
         >
-          {/* 欢迎信息 */}
           {!hasAnyCardData && !isLoading && (
             <div className="max-w-3xl mx-auto text-center py-8">
               <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -192,7 +174,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* 加载状态 */}
           {isLoading && (
             <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-6 border border-gray-100 flex items-center justify-center">
               <div className="flex flex-col items-center">
@@ -204,10 +185,8 @@ export default function Home() {
             </div>
           )}
 
-          {/* 生成的卡片内容 */}
           {hasAnyCardData && (
             <div className="max-w-6xl mx-auto">
-              {/* 用户输入显示 */}
               <div className="bg-blue-50 rounded-lg p-3 mb-4 border border-blue-100">
                 <div className="flex items-start">
                   <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 mr-2">
@@ -219,14 +198,12 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* AI 生成的卡片 - 标题 */}
               <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-sm p-3 border border-gray-100 mb-4">
                 <div className="flex items-start mb-2">
                   <div className="w-7 h-7 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 mr-2">
                     AI
                   </div>
                   <div className="flex-grow">
-                    {/* 使用第一个有效的卡片数据显示标题 */}
                     {Object.values(cardDataMap).find(data => data !== null) && (
                       <>
                         <h3 className="text-lg font-bold text-gray-800 mb-1">
@@ -243,7 +220,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 替换清除按钮区域 */}
               <div className="mb-4 flex justify-between items-center">
                 <div className="text-sm text-gray-500">
                   {hasAnyCardData ? "已生成卡片，显示不同样式效果" : "尚未生成卡片"}
@@ -286,7 +262,7 @@ export default function Home() {
                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center z-10">
                                 <div className="flex gap-2 flex-col">
                                   <Link
-                                    href={`/preview?template=${templateId}&title=${encodeURIComponent(templateData.title)}&id=${Date.now()}-${index}`}
+                                    href={`/preview?template=${templateId}&title=${encodeURIComponent(templateData.title)}&id=${index}`}
                                     className="bg-white hover:bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
                                     onClick={() => saveCardDataForPreview(templateId, templateData)}
                                   >
@@ -294,7 +270,7 @@ export default function Home() {
                                     预览
                                   </Link>
                                   <Link
-                                    href={`/detail?template=${templateId}&title=${encodeURIComponent(templateData.title)}&id=${Date.now()}-${index}`}
+                                    href={`/detail?template=${templateId}&title=${encodeURIComponent(templateData.title)}&id=${index}`}
                                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
                                     onClick={() => saveCardDataForPreview(templateId, templateData)}
                                   >
@@ -328,7 +304,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* 错误提示 */}
           {error && (
             <div className="max-w-3xl mx-auto p-3 text-red-500 bg-red-50 rounded-xl border border-red-200 animate-fade-in shadow-sm">
               <div className="flex items-center">
@@ -341,7 +316,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* 底部输入区域 */}
         <div className="border-t border-gray-200 bg-white/90 backdrop-blur-sm p-4">
           <div className="max-w-3xl mx-auto">
             <form onSubmit={handleFormSubmit} className="relative">
@@ -375,7 +349,6 @@ export default function Home() {
               </button>
             </form>
 
-            {/* 历史记录快捷访问 */}
             {inputHistory.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {inputHistory.slice(0, 3).map((item, index) => (
@@ -399,7 +372,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 页脚 */}
       <footer className="w-full py-2 text-center text-gray-500 text-xs">
         <p>AI 信息卡片生成器 © {new Date().getFullYear()}</p>
       </footer>

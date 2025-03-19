@@ -1,8 +1,7 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { streamObject } from "ai";
+import OpenAI from "openai";
+import { zodResponseFormat } from "openai/helpers/zod";
 
 import {
-  CardSchema,
   BasicCardSchema,
   ListCardSchema,
   StepsCardSchema,
@@ -15,13 +14,35 @@ import {
 } from "@/lib/schemas/card";
 import { z } from "zod";
 
-const google = createGoogleGenerativeAI({
-  // custom settings
-  apiKey: process.env.GOOGLE_API_KEY || "",
-  baseURL: "https://api.genai.gd.edu.kg/google//v1beta/",
+// const google = createGoogleGenerativeAI({
+//   // custom settings
+//   apiKey: process.env.GOOGLE_API_KEY || "",
+//   baseURL: "https://api.genai.gd.edu.kg/google//v1beta/",
+// });
+
+// 验证必需的环境变量
+const requiredEnvVars = [
+  'AZURE_OPENAI_API_KEY',
+  'AZURE_OPENAI_ENDPOINT',
+  'AZURE_OPENAI_DEPLOYMENT_NAME',
+  'AZURE_OPENAI_API_VERSION'
+] as const;
+
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    throw new Error(`Missing required environment variable: ${envVar}`);
+  }
+}
+
+// 配置Azure OpenAI客户端
+const client = new OpenAI({
+  apiKey: process.env.AZURE_OPENAI_API_KEY,
+  baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT_NAME}`,
+  defaultQuery: { 'api-version': process.env.AZURE_OPENAI_API_VERSION },
+  defaultHeaders: { 'api-key': process.env.AZURE_OPENAI_API_KEY },
 });
 
-const model = google("gemini-1.5-pro-latest");
+// const model = google("gemini-1.5-pro-latest");
 
 export const runtime = "edge";
 
@@ -229,9 +250,8 @@ export async function POST(req: Request) {
     const schema = getSchemaByType(type as z.infer<typeof CardTypeSchema>);
     const systemPrompt = cardPrompts[type as z.infer<typeof CardTypeSchema>];
 
-    const result = await streamObject({
-      model,
-      schema,
+    const stream = await client.beta.chat.completions.stream({
+      model: "gpt-4o-2024-08-06",
       messages: [
         {
           role: "system",
@@ -239,9 +259,26 @@ export async function POST(req: Request) {
         },
         { role: "user", content: prompt },
       ],
-    });
+      response_format: zodResponseFormat(schema, "entities"),
+    }).on("refusal.done", () => console.log("request refused"))
+      .on("content.delta", ({ snapshot, parsed }) => {
+        // console.log("content:", snapshot);
+        // console.log("parsed:", parsed);
+        // console.log();
+      })
+      .on("content.done", (props) => {
+        // console.log(props);
+      });
 
-    return result.toTextStreamResponse();
+    await stream.done();
+
+    const finalCompletion = await stream.finalChatCompletion();
+
+    console.log(finalCompletion.choices[0].message.content, '>>>event');
+
+    return Response.json({
+      data: finalCompletion.choices[0].message.content
+    })
 
   } catch (error) {
     console.error("Error:", error);

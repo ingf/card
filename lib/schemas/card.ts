@@ -5,7 +5,7 @@ export const IconSchema = z.object({
   type: z.enum(["emoji", "lucide", "custom"]),
   value: z.string(),
   style: z.object({
-    size: z.number().optional().default(24),
+    size: z.number().optional(),
     color: z.string().optional(),
     backgroundColor: z.string().optional()
   }).optional()
@@ -16,7 +16,7 @@ export const VisualElementSchema = z.object({
   type: z.enum(["icon", "illustration", "image", "chart"]),
   source: z.string(),
   alt: z.string().optional(),
-  position: z.enum(["top", "left", "right", "bottom", "background"]).optional().default("left"),
+  position: z.enum(["top", "left", "right", "bottom", "background"]).optional(),
   style: z.object({
     width: z.string().optional(),
     height: z.string().optional(),
@@ -39,7 +39,7 @@ export const BaseStyleSchema = z.object({
 export const LinkSchema = z.object({
   url: z.string(),
   text: z.string().optional(),
-  isExternal: z.boolean().optional().default(false)
+  isExternal: z.boolean().optional()
 })
 
 // 定义基础卡片项属性（所有类型共享的属性）
@@ -48,7 +48,7 @@ export const BaseCardItemSchema = z.object({
   title: z.string(),
   description: z.string(),
   icon: IconSchema.optional(),
-  highlight: z.boolean().optional().default(false),
+  highlight: z.boolean().optional(),
   style: BaseStyleSchema.optional(),
   tags: z.array(z.string()).optional(),
   link: LinkSchema.optional(),
@@ -76,14 +76,14 @@ export const StepCardItemSchema = BaseCardItemSchema.extend({
   type: z.literal("step"),
   actionStep: z.string(),
   stepNumber: z.number().optional(),
-  isCompleted: z.boolean().optional().default(false),
+  isCompleted: z.boolean().optional(),
 })
 
 // 列表卡片项
 export const ListCardItemSchema = BaseCardItemSchema.extend({
   type: z.literal("list"),
   bulletPoints: z.array(z.string()),
-  bulletStyle: z.enum(["disc", "circle", "square", "numbered", "alpha", "roman"]).optional().default("disc"),
+  bulletStyle: z.enum(["disc", "circle", "square", "numbered", "alpha", "roman"]).optional(),
 })
 
 // 统计数据卡片项
@@ -115,7 +115,7 @@ export const LocationCardItemSchema = BaseCardItemSchema.extend({
 export const KeyValueCardItemSchema = BaseCardItemSchema.extend({
   type: z.literal("keyValue"),
   keyValue: z.record(z.string()),
-  layout: z.enum(["horizontal", "vertical"]).optional().default("vertical"),
+  layout: z.enum(["horizontal", "vertical"]).optional(),
 })
 
 // 模板文本卡片项
@@ -144,25 +144,25 @@ export const LayoutSchema = z.object({
   alignment: z.enum(["left", "center", "right"]).optional(),
   spacing: z.enum(["small", "medium", "large"]).optional(),
   itemStyle: z.enum(["card", "bordered", "minimal", "numbered", "icon", "image"]).optional(),
-  showDividers: z.boolean().optional().default(false),
-  showNumbers: z.boolean().optional().default(false),
-  showIcons: z.boolean().optional().default(false),
-  animation: z.enum(["none", "fade", "slide", "zoom"]).optional().default("none"),
+  showDividers: z.boolean().optional(),
+  showNumbers: z.boolean().optional(),
+  showIcons: z.boolean().optional(),
+  animation: z.enum(["none", "fade", "slide", "zoom"]).optional(),
   maxHeight: z.string().optional(), // 支持最大高度设置
   aspectRatio: z.string().optional(), // 支持宽高比设置
 })
 
 // 定义主题类型
 export const ThemeSchema = z.object({
-  primaryColor: z.string().default("#FF9966"), // 用于数字标记的颜色
-  backgroundColor: z.string().default("#FFFFFF"),
-  textColor: z.string().default("#000000"),
+  primaryColor: z.string(), // 用于数字标记的颜色
+  backgroundColor: z.string(),
+  textColor: z.string(),
   accentColor: z.string().optional(), // 用于强调色
   fontFamily: z.string().optional(),
-  borderRadius: z.string().optional().default("0.5rem"),
-  cardStyle: z.enum(["flat", "outlined", "elevated", "glass"]).optional().default("elevated"),
-  colorScheme: z.enum(["light", "dark", "auto"]).optional().default("light"),
-  animation: z.enum(["none", "fade", "slide", "zoom"]).optional().default("none"),
+  borderRadius: z.string().optional(),
+  cardStyle: z.enum(["flat", "outlined", "elevated", "glass"]).optional(),
+  colorScheme: z.enum(["light", "dark", "auto"]).optional(),
+  animation: z.enum(["none", "fade", "slide", "zoom"]).optional(),
   // 新增主题属性
   headerStyle: z.object({
     backgroundColor: z.string().optional(),
@@ -210,36 +210,36 @@ export const BaseCardSchema = z.object({
   // theme: ThemeSchema,
   footer: z.object({
     text: z.string().optional(),
-    showAttribution: z.boolean().optional().default(false),
+    showAttribution: z.boolean().optional(),
     links: z.array(z.object({
       text: z.string(),
       url: z.string(),
       icon: z.string().optional(),
     })).optional(),
   }).optional(),
-  header: z.object({
-    icon: IconSchema.optional(),
-    visualElement: VisualElementSchema.optional(),
-    actions: z.array(z.object({
-      text: z.string(),
-      icon: z.string().optional(),
-      action: z.string(),
-    })).optional(),
-  }).optional(),
-  metadata: z.object({
-    author: z.string().optional(),
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
-    tags: z.array(z.string()).optional(),
-    source: z.string().optional(),
-  }).optional(),
-  interactivity: z.object({
-    isExpandable: z.boolean().optional().default(false),
-    isSwipeable: z.boolean().optional().default(false),
-    hasSearch: z.boolean().optional().default(false),
-    hasFilters: z.boolean().optional().default(false),
-    hasSorting: z.boolean().optional().default(false),
-  }).optional(),
+  // header: z.object({
+  //   icon: IconSchema.optional(),
+  //   visualElement: VisualElementSchema.optional(),
+  //   actions: z.array(z.object({
+  //     text: z.string(),
+  //     icon: z.string().optional(),
+  //     action: z.string(),
+  //   })).optional(),
+  // }).optional(),
+  // metadata: z.object({
+  //   author: z.string().optional(),
+  //   createdAt: z.string().optional(),
+  //   updatedAt: z.string().optional(),
+  //   tags: z.array(z.string()).optional(),
+  //   source: z.string().optional(),
+  // }).optional(),
+  // interactivity: z.object({
+  //   isExpandable: z.boolean().optional(),
+  //   isSwipeable: z.boolean().optional(),
+  //   hasSearch: z.boolean().optional(),
+  //   hasFilters: z.boolean().optional(),
+  //   hasSorting: z.boolean().optional(),
+  // }).optional(),
 })
 
 // 基础卡片
@@ -263,10 +263,10 @@ export const StepsCardSchema = BaseCardSchema.extend({
   type: z.literal("steps"),
   layout: LayoutSchema.extend({
     type: z.enum(["list", "timeline"]),
-    showNumbers: z.literal(true).default(true),
+    showNumbers: z.literal(true),
   }).optional(),
   items: z.array(StepCardItemSchema),
-  isSequential: z.boolean().optional().default(true),
+  isSequential: z.boolean().optional(),
 })
 
 // 统计卡片
@@ -274,10 +274,10 @@ export const StatsCardSchema = BaseCardSchema.extend({
   type: z.literal("stats"),
   layout: LayoutSchema.extend({
     type: z.enum(["grid", "list"]),
-    columns: z.number().optional().default(2),
+    columns: z.number().optional(),
   }).optional(),
   items: z.array(StatCardItemSchema),
-  showComparison: z.boolean().optional().default(false),
+  showComparison: z.boolean().optional(),
 })
 
 // 媒体卡片
@@ -295,7 +295,7 @@ export const LocationCardSchema = BaseCardSchema.extend({
   type: z.literal("location"),
   layout: LayoutSchema.optional(),
   items: z.array(LocationCardItemSchema),
-  showMap: z.boolean().optional().default(true),
+  showMap: z.boolean().optional(),
 })
 
 // 键值对卡片
