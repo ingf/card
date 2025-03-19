@@ -235,7 +235,6 @@ const getSchemaByType = (type: z.infer<typeof CardTypeSchema>) => {
 export async function POST(req: Request) {
   try {
     const { prompt, type = "list" } = await req.json();
-    console.log("prompt", prompt, "type", type);
 
     if (!prompt || prompt.length === 0) {
       throw new Error("No prompt provided");
@@ -250,7 +249,7 @@ export async function POST(req: Request) {
     const schema = getSchemaByType(type as z.infer<typeof CardTypeSchema>);
     const systemPrompt = cardPrompts[type as z.infer<typeof CardTypeSchema>];
 
-    const stream = await client.beta.chat.completions.stream({
+    const completion = await client.chat.completions.create({
       model: "gpt-4o-2024-08-06",
       messages: [
         {
@@ -260,28 +259,17 @@ export async function POST(req: Request) {
         { role: "user", content: prompt },
       ],
       response_format: zodResponseFormat(schema, "entities"),
-    }).on("refusal.done", () => console.log("request refused"))
-      .on("content.delta", ({ snapshot, parsed }) => {
-        // console.log("content:", snapshot);
-        // console.log("parsed:", parsed);
-        // console.log();
-      })
-      .on("content.done", (props) => {
-        // console.log(props);
-      });
+    });
 
-    await stream.done();
+    // await stream.done();
 
-    const finalCompletion = await stream.finalChatCompletion();
-
-    console.log(finalCompletion.choices[0].message.content, '>>>event');
+    // const finalCompletion = await stream.finalChatCompletion();
 
     return Response.json({
-      data: finalCompletion.choices[0].message.content
+      data: JSON.parse(completion.choices[0].message.content || "{}")
     })
 
   } catch (error) {
-    console.error("Error:", error);
     return new Response("Invalid request", { status: 400 });
   }
 }

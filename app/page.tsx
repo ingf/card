@@ -94,7 +94,7 @@ export default function Home() {
 
       setCardDataMap(prev => ({
         ...prev,
-        [templateType]: JSON.parse(data.data)
+        [templateType]: data.data
       }));
 
     } catch (e) {
