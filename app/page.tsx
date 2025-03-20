@@ -32,6 +32,9 @@ export default function Home() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
+  const [cardScale, setCardScale] = useState({ scale: 0.5, height: '200%' });
+  const cardRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (inputRef.current && !isLoading) {
       inputRef.current.focus();
@@ -63,6 +66,30 @@ export default function Home() {
       setInputHistory(JSON.parse(savedHistory));
     }
   }, []); // 仅在组件挂载时执行一次
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (cardRef.current) {
+        const parentHeight = cardRef.current.parentElement?.clientHeight || 0;
+        const cardHeight = cardRef.current.scrollHeight;
+        const scale = parentHeight / cardHeight;
+        const compensationHeight = `${(1 / scale) * 100}%`;
+
+        setCardScale({
+          scale: scale,
+          height: compensationHeight
+        });
+      }
+    };
+
+    updateScale();
+    const resizeObserver = new ResizeObserver(updateScale);
+    if (cardRef.current) {
+      resizeObserver.observe(cardRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, [cardDataMap]);
 
   const saveCardDataForPreview = (templateId: CardTypeEnum, data: CardType) => {
     try {
@@ -147,6 +174,15 @@ export default function Home() {
   const clearCardData = () => {
     setCardDataMap({} as Partial<Record<CardTypeEnum, CardType | null>>);
     sessionStorage.removeItem('cardDataMap');
+  };
+
+  const getScaleConfig = (templateId: string) => {
+    const configs = {
+      basic: { scale: 0.5, height: '200%' },
+      list: { scale: 0.45, height: '220%' },
+      // 其他模板的配置...
+    };
+    return configs[templateId as keyof typeof configs] || { scale: 0.5, height: '200%' };
   };
 
   return (
@@ -283,13 +319,22 @@ export default function Home() {
                                 </div>
                               </div>
 
-                              <div className="w-full h-full">
-                                <Card
-                                  data={templateData}
-                                  posterFormat={templateId}
-                                  hideNavigation={true}
-                                  className="h-full w-full"
-                                />
+                              <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                                <div
+                                  style={{
+                                    transform: 'scale(0.7)',
+                                    // transformOrigin: 'center center',
+                                    // width: '250%',
+                                    // height: '250%'
+                                  }}
+                                >
+                                  <Card
+                                    data={templateData}
+                                    posterFormat={templateId}
+                                    hideNavigation={true}
+                                    className="w-full h-full"
+                                  />
+                                </div>
                               </div>
                             </>
                           ) : (
