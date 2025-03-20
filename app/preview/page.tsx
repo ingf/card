@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card as CardType, CardType as CardTypeEnum } from "@/lib/schemas/card";
 import { ArrowLeft, Download, Share2 } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/Card";
+import html2canvas from "html2canvas";
 
 export default function PreviewPage() {
   const searchParams = useSearchParams();
@@ -14,6 +15,7 @@ export default function PreviewPage() {
 
   const [cardData, setCardData] = useState<CardType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const cardContainerRef = useRef<HTMLDivElement>(null);
 
   // 从 localStorage 获取数据
   useEffect(() => {
@@ -55,6 +57,36 @@ export default function PreviewPage() {
     }
   };
 
+  // 下载功能
+  const handleDownload = async () => {
+    if (!cardContainerRef.current) return;
+
+    try {
+      // 显示加载提示
+      const loadingToast = alert("正在生成图片，请稍候...");
+
+      // 创建canvas
+      const canvas = await html2canvas(cardContainerRef.current, {
+        scale: 2, // 提高清晰度
+        backgroundColor: "#ffffff",
+        useCORS: true, // 支持跨域图片
+        logging: false,
+      });
+
+      // 转换为图片
+      const image = canvas.toDataURL("image/png", 1.0);
+
+      // 创建下载链接
+      const link = document.createElement("a");
+      link.download = `${cardData?.title || "健康饮食卡片"}.png`;
+      link.href = image;
+      link.click();
+
+    } catch (error) {
+      console.error("生成图片失败:", error);
+      alert("生成图片失败，请重试");
+    }
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex flex-col">
@@ -74,7 +106,7 @@ export default function PreviewPage() {
           </button>
           <button
             className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100"
-            onClick={() => alert('下载功能将在后续版本中实现')}
+            onClick={handleDownload}
           >
             <Download className="h-5 w-5" />
           </button>
@@ -82,14 +114,14 @@ export default function PreviewPage() {
       </div>
 
       {/* 主内容区域 - 使用Card组件展示卡片 */}
-      <div className="flex-grow p-4 overflow-y-auto">
+      <div className="flex-grow p-4 overflow-y-auto flex justify-center">
         {isLoading ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600">加载中...</p>
           </div>
         ) : cardData ? (
-          <div className="max-w-3xl mx-auto">
+          <div className="w-full max-w-md mx-auto bg-white p-6 rounded-lg" ref={cardContainerRef}>
             {/* 卡片标题区域 */}
             <div className="mb-6 text-center">
               <h2 className="text-2xl font-bold mb-2" style={{ color: '#000' }}>
@@ -103,7 +135,7 @@ export default function PreviewPage() {
             {/* 使用Card组件展示每个卡片项 */}
             <div className="space-y-8 flex flex-col items-center">
               {cardData.items.map((item, index) => (
-                <div key={index} className="transform scale-100 origin-top w-full max-w-2xl">
+                <div key={index} className="transform scale-100 origin-top">
                   <Card
                     data={cardData}
                     index={index}
@@ -114,30 +146,6 @@ export default function PreviewPage() {
                 </div>
               ))}
             </div>
-
-            {/* 底部信息 */}
-            {cardData.footer && (
-              <div className="w-full bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 p-4 mt-8 mb-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">{cardData.footer.text}</span>
-                  {cardData.footer.links && cardData.footer.links.length > 0 && (
-                    <a
-                      href={cardData.footer.links[0].url}
-                      className="flex items-center gap-1 hover:underline"
-                      style={{ color: '#FF9966' }}
-                    >
-                      {cardData.footer.links[0].text}
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                      </svg>
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         ) : (
           <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md mx-auto">
@@ -150,7 +158,7 @@ export default function PreviewPage() {
       </div>
 
       {/* 底部操作栏 */}
-      <div className="bg-white border-t border-gray-200 p-4 flex justify-center sticky bottom-0">
+      {/* <div className="bg-white border-t border-gray-200 p-4 flex justify-center sticky bottom-0">
         <div className="max-w-md w-full bg-white rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
           <Link
             href={`/detail?template=${template}&title=${encodeURIComponent(title || '')}`}
@@ -160,18 +168,18 @@ export default function PreviewPage() {
           </Link>
           <button
             className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors border-r border-gray-100"
-            onClick={() => alert('下载功能将在后续版本中实现')}
+            onClick={handleDownload}
           >
             <span className="text-sm">下载</span>
           </button>
           <button
             className="flex-1 py-3 text-center text-gray-700 hover:bg-gray-50 transition-colors"
-            onClick={() => alert('更多功能将在后续版本中实现')}
+            onClick={handleShare}
           >
-            <span className="text-sm">⋮</span>
+            <span className="text-sm">分享</span>
           </button>
         </div>
-      </div>
+      </div> */}
     </main>
   );
 }
