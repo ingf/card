@@ -101,11 +101,12 @@ export default function PreviewPage() {
             </div>
 
             {/* 使用Card组件展示每个卡片项 */}
-            <div className="space-y-8">
+            <div className="space-y-8 flex flex-col items-center">
               {cardData.items.map((item, index) => (
-                <div key={index} className="transform scale-100 origin-top">
+                <div key={index} className="transform scale-100 origin-top w-full max-w-2xl">
                   <Card
                     data={cardData}
+                    index={index}
                     posterFormat={template}
                     hideNavigation={true}
                     className="w-full shadow-lg"
