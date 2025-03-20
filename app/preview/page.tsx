@@ -121,7 +121,7 @@ export default function PreviewPage() {
             <p className="text-gray-600">加载中...</p>
           </div>
         ) : cardData ? (
-          <div className="w-full max-w-md" ref={cardContainerRef}>
+          <div className="w-full max-w-md mx-auto bg-white p-6 rounded-lg" ref={cardContainerRef}>
             {/* 卡片标题区域 */}
             <div className="mb-6 text-center">
               <h2 className="text-2xl font-bold mb-2" style={{ color: '#000' }}>
@@ -133,7 +133,7 @@ export default function PreviewPage() {
             </div>
 
             {/* 使用Card组件展示每个卡片项 */}
-            <div className="space-y-8">
+            <div className="space-y-8 flex flex-col items-center">
               {cardData.items.map((item, index) => (
                 <div key={index} className="transform scale-100 origin-top">
                   <Card
