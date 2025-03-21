@@ -200,6 +200,7 @@ export const CardTypeSchema = z.enum([
   "location", // 位置卡片
   "keyValue", // 键值对卡片
   "template", // 模板卡片
+  "html",     // html卡片
 ])
 
 // 定义基础卡片属性（所有卡片类型共享的属性）

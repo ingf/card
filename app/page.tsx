@@ -23,8 +23,9 @@ export default function Home() {
     "list",        // 列表卡片
     "steps",       // 步骤卡片
     "stats",       // 统计卡片
-    "media",       // 媒体卡片
+    // "media",       // 媒体卡片
     "location",    // 位置卡片
+    "html",        // html卡片
     // "keyValue",    // 键值对卡片
     // "template",    // 模板卡片
   ]);
@@ -105,15 +106,18 @@ export default function Home() {
     setLoadingTemplates(prev => [...prev, templateType]);
 
     try {
+      // 为不同的卡片类型准备不同的请求格式
+      const requestBody = {
+        prompt: userPrompt,
+        type: templateType
+      };
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          prompt: userPrompt,
-          type: templateType
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -169,16 +173,28 @@ export default function Home() {
     try {
       setInputHistory(prev => [input, ...prev]);
 
-      const fetchPromises = templates.map(templateType =>
-        fetchTemplateData(templateType, input)
+      // 收集所有错误
+      const errors: string[] = [];
+      const results = await Promise.allSettled(
+        templates.map(templateType => fetchTemplateData(templateType, input))
       );
-
-      await Promise.all(fetchPromises);
+      
+      // 检查是否所有请求都失败
+      const allFailed = results.every(result => result.status === 'rejected');
+      if (allFailed) {
+        throw new Error("所有卡片类型生成失败，请重试或修改提示词");
+      }
+      
+      // 显示部分失败信息
+      const failedCount = results.filter(result => result.status === 'rejected').length;
+      if (failedCount > 0) {
+        setError(`${failedCount}/${templates.length} 个卡片类型生成失败，但其他类型已成功生成`);
+      }
 
       setInput("");
     } catch (e) {
       console.error("Error:", e);
-      setError("生成失败，请重试");
+      setError((e as Error).message || "生成失败，请重试");
     } finally {
       setIsLoading(false);
     }
