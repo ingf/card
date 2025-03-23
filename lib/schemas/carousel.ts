@@ -1,3 +1,5 @@
+// 轮播图卡片
+
 import { z } from "zod"
 import { BaseStyleSchema, IconSchema, LinkSchema, VisualElementSchema } from "./base"
 

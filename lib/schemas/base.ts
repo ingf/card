@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+// 基础类型
+
 // 定义图标类型
 export const IconSchema = z.object({
   type: z.enum(["emoji", "lucide", "custom"]),

@@ -1,5 +1,8 @@
+// 卡片汇总
+
 import { z } from "zod"
 import { CarouselSchema } from "./carousel"
+import { QuoteSchema } from "./quote"
 
 
 export const CardTypeSchema = z.enum([
@@ -9,7 +12,7 @@ export const CardTypeSchema = z.enum([
 ])
 
 export type CardType = z.infer<typeof CardTypeSchema>
-export type Card = z.infer<typeof CarouselSchema>
-
+export type CardOrQuote = z.infer<typeof CarouselSchema> | z.infer<typeof QuoteSchema>
 
 export * from './carousel'
+export * from './quote'
