@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/Card";
-import type { Card as CardType, Layout, CardType as CardTypeEnum } from "@/lib/schemas/card";
-import { Sparkles, Loader2, Send, Clock, Download, Eye, ExternalLink } from "lucide-react";
+import type { CardSchema as CardType, CardType as CardTypeEnum } from "@/lib/schemas/card";
+import { Sparkles, Loader2, Send, Clock, Eye, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useSessionStorage } from "@/lib/hooks/useSessionStorage";
 

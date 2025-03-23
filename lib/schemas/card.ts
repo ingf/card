@@ -12,7 +12,7 @@ export const CardTypeSchema = z.enum([
 ])
 
 export type CardType = z.infer<typeof CardTypeSchema>
-export type CardOrQuote = z.infer<typeof CarouselSchema> | z.infer<typeof QuoteSchema>
+export type CardSchema = z.infer<typeof CarouselSchema> | z.infer<typeof QuoteSchema>
 
 export * from './carousel'
 export * from './quote'
