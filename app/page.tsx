@@ -21,10 +21,10 @@ export default function Home() {
   const [templates, setTemplates] = useState<CardTypeEnum[]>([
     "basic",       // 基础卡片
     "list",        // 列表卡片
-    "steps",       // 步骤卡片
-    "stats",       // 统计卡片
+    // "steps",       // 步骤卡片
+    // "stats",       // 统计卡片
     // "media",       // 媒体卡片
-    "location",    // 位置卡片
+    // "location",    // 位置卡片
     "html",        // html卡片
     // "keyValue",    // 键值对卡片
     // "template",    // 模板卡片
@@ -178,13 +178,13 @@ export default function Home() {
       const results = await Promise.allSettled(
         templates.map(templateType => fetchTemplateData(templateType, input))
       );
-      
+
       // 检查是否所有请求都失败
       const allFailed = results.every(result => result.status === 'rejected');
       if (allFailed) {
         throw new Error("所有卡片类型生成失败，请重试或修改提示词");
       }
-      
+
       // 显示部分失败信息
       const failedCount = results.filter(result => result.status === 'rejected').length;
       if (failedCount > 0) {

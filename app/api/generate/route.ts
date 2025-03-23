@@ -3,26 +3,19 @@ import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 
 import {
-  BasicCardSchema,
-  ListCardSchema,
-  StepsCardSchema,
-  StatsCardSchema,
-  MediaCardSchema,
-  LocationCardSchema,
-  KeyValueCardSchema,
-  TemplateCardSchema,
+  // 轮播图卡片
+  BasicCarouselSchema,
+  ListCarouselSchema,
+  MediaCarouselSchema,
+  // Quote类型
+
+  // 枚举
   CardTypeSchema,
 } from "@/lib/schemas/card";
 import { contentPrompt, content2HtmlTemplate } from "@/app/prompts/content";
 import {
   listCardPrompt,
   basicCardPrompt,
-  stepsCardPrompt,
-  statsCardPrompt,
-  mediaCardPrompt,
-  locationCardPrompt,
-  keyValueCardPrompt,
-  templateCardPrompt,
 } from "@/app/prompts/cardPrompt";
 
 // const google = createGoogleGenerativeAI({
@@ -61,30 +54,18 @@ export const runtime = "edge";
 const cardPrompts: Record<z.infer<typeof CardTypeSchema>, string> = {
   list: listCardPrompt,
   basic: basicCardPrompt,
-  steps: stepsCardPrompt,
-  stats: statsCardPrompt,
-  media: mediaCardPrompt,
-  location: locationCardPrompt,
-  keyValue: keyValueCardPrompt,
-  template: templateCardPrompt,
   html: content2HtmlTemplate,
 };
 
 // 获取对应的 schema
 const getSchemaByType = (type: z.infer<typeof CardTypeSchema>) => {
   const schemaMap: Record<z.infer<typeof CardTypeSchema>, z.ZodType> = {
-    basic: BasicCardSchema,
-    list: ListCardSchema,
-    steps: StepsCardSchema,
-    stats: StatsCardSchema,
-    media: MediaCardSchema,
-    location: LocationCardSchema,
-    keyValue: KeyValueCardSchema,
-    template: TemplateCardSchema,
-    html: MediaCardSchema,
+    basic: BasicCarouselSchema,
+    list: ListCarouselSchema,
+    html: MediaCarouselSchema,
   };
 
-  return schemaMap[type] || ListCardSchema; // 默认返回 ListCardSchema
+  return schemaMap[type] || ListCarouselSchema; // 默认返回 ListCardSchema
 };
 
 export async function POST(req: Request) {
@@ -154,10 +135,6 @@ export async function POST(req: Request) {
         data: {
           html: htmlResult?.replace(/```html|```/g, ""),
         },
-      });
-
-      return Response.json({
-        data: JSON.parse(completion.choices[0].message.content || "{}"),
       });
 
       // // 构建系统消息，使用模板
