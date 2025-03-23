@@ -3,9 +3,10 @@
 import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/Card";
 import type { CardSchema as CardType, CardType as CardTypeEnum } from "@/lib/schemas/card";
-import { Sparkles, Loader2, Send, Clock, Eye, ExternalLink } from "lucide-react";
+import { Sparkles, Loader2, Send, Clock, Eye, ExternalLink, LayoutGrid, AlignLeft, Type, Image, Quote, Layout } from "lucide-react";
 import Link from "next/link";
 import { useSessionStorage } from "@/lib/hooks/useSessionStorage";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
@@ -17,6 +18,8 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [inputHistory, setInputHistory] = useSessionStorage<string[]>('inputHistory', []);
+  const [selectedType, setSelectedType] = useState<CardTypeEnum>("basic");
+  const [selectedLayout, setSelectedLayout] = useState<string>("carousel");
 
   const [templates, setTemplates] = useState<CardTypeEnum[]>([
     "basic",       // 基础卡片
@@ -35,6 +38,42 @@ export default function Home() {
 
   const [cardScale, setCardScale] = useState({ scale: 0.5, height: '200%' });
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const cardTypes = [
+    { id: "basic" as const, name: "基础卡片", description: "简单清晰的信息展示" },
+    { id: "list" as const, name: "列表卡片", description: "结构化的列表内容" },
+    { id: "html" as const, name: "富文本卡片", description: "支持富文本格式" },
+  ];
+
+  const layoutTypes = [
+    {
+      id: "carousel",
+      name: "轮播布局",
+      icon: (
+        <div className="w-full aspect-video border-2 border-current p-1 flex gap-1">
+          <div className="flex-1 h-full bg-current"></div>
+          <div className="w-1 h-full flex flex-col justify-center gap-1">
+            <div className="w-1 h-1 rounded-full bg-current"></div>
+            <div className="w-1 h-1 rounded-full bg-current opacity-50"></div>
+            <div className="w-1 h-1 rounded-full bg-current opacity-50"></div>
+          </div>
+        </div>
+      ),
+      description: "适合展示多张图片或内容的轮播展示",
+    },
+    {
+      id: "quote",
+      name: "引用布局",
+      icon: (
+        <div className="w-full aspect-square border-2 border-current p-1">
+          <div className="text-2xl font-serif mb-1">"</div>
+          <div className="w-full h-2 bg-current mb-1"></div>
+          <div className="w-2/3 h-2 bg-current"></div>
+        </div>
+      ),
+      description: "适合展示名言警句或重要引用",
+    },
+  ];
 
   useEffect(() => {
     if (inputRef.current && !isLoading) {
@@ -106,10 +145,10 @@ export default function Home() {
     setLoadingTemplates(prev => [...prev, templateType]);
 
     try {
-      // 为不同的卡片类型准备不同的请求格式
       const requestBody = {
         prompt: userPrompt,
-        type: templateType
+        type: templateType,
+        layout: selectedLayout
       };
 
       const response = await fetch('/api/generate', {
@@ -141,6 +180,7 @@ export default function Home() {
 
     } catch (e) {
       console.error(`Error fetching ${templateType} template:`, e);
+      throw e;
     } finally {
       setLoadingTemplates(prev => prev.filter(t => t !== templateType));
     }
@@ -173,25 +213,9 @@ export default function Home() {
     try {
       setInputHistory(prev => [input, ...prev]);
 
-      // 收集所有错误
-      const errors: string[] = [];
-      const results = await Promise.allSettled(
-        templates.map(templateType => fetchTemplateData(templateType, input))
-      );
+      // 只请求选中的类型
+      await fetchTemplateData(selectedType, input);
 
-      // 检查是否所有请求都失败
-      const allFailed = results.every(result => result.status === 'rejected');
-      if (allFailed) {
-        throw new Error("所有卡片类型生成失败，请重试或修改提示词");
-      }
-
-      // 显示部分失败信息
-      const failedCount = results.filter(result => result.status === 'rejected').length;
-      if (failedCount > 0) {
-        setError(`${failedCount}/${templates.length} 个卡片类型生成失败，但其他类型已成功生成`);
-      }
-
-      setInput("");
     } catch (e) {
       console.error("Error:", e);
       setError((e as Error).message || "生成失败，请重试");
@@ -261,10 +285,6 @@ export default function Home() {
         >
           {!hasAnyCardData && !isLoading && (
             <div className="max-w-3xl mx-auto text-center py-8">
-              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-10 w-10 text-blue-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">AI 信息卡片生成器</h2>
               <p className="text-gray-600 text-lg mb-6 max-w-xl mx-auto">
                 在下方输入任何主题，AI 将为您生成结构化的信息卡片
               </p>
@@ -422,58 +442,127 @@ export default function Home() {
           )}
         </div>
 
-        <div className="border-t border-gray-200 bg-white/90 backdrop-blur-sm p-4">
-          <div className="max-w-3xl mx-auto">
-            <form onSubmit={handleFormSubmit} className="relative">
-              <textarea
-                ref={inputRef}
-                className="w-full p-3 pr-16 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white/50 backdrop-blur-sm transition-all resize-none"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="输入您想要生成的信息卡片内容，例如：'如何建立自律习惯'、'健康饮食的五个关键点'..."
-                disabled={isLoading}
-                rows={2}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    if (input.trim()) {
-                      handleFormSubmit(e);
-                    }
-                  }
-                }}
-              />
-              <button
-                type="submit"
-                className="absolute right-2 bottom-2 px-3 py-2 text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:from-blue-600 hover:to-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
-                disabled={isLoading || !input.trim()}
-              >
-                {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Send className="h-5 w-5" />
-                )}
-              </button>
-            </form>
-
-            {inputHistory.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {inputHistory.slice(0, 3).map((item, index) => (
+        <div className="border-t border-gray-200 bg-white/90 backdrop-blur-sm p-6">
+          <div className="max-w-3xl mx-auto space-y-6">
+            {/* 布局选择器 */}
+            <div className="flex flex-col items-center space-y-4">
+              <h3 className="text-lg font-medium text-gray-900">选择展示方式</h3>
+              <div className="flex gap-4 w-full max-w-md">
+                {layoutTypes.map((layout) => (
                   <button
-                    key={index}
-                    onClick={() => selectHistoryInput(item)}
-                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition-colors truncate max-w-xs"
+                    key={layout.id}
+                    onClick={() => setSelectedLayout(layout.id)}
+                    className={cn(
+                      "flex-1 group relative overflow-hidden rounded-xl border-2 transition-all duration-200 aspect-[4/3]",
+                      selectedLayout === layout.id
+                        ? "border-blue-500 text-blue-500 bg-blue-50"
+                        : "border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                    )}
                   >
-                    <Clock className="h-3 w-3 inline mr-1" />
-                    {item.length > 30 ? item.substring(0, 30) + "..." : item}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className={cn(
+                        "w-16 h-16 transition-colors duration-200",
+                        selectedLayout === layout.id
+                          ? "text-blue-500"  // 选中状态使用蓝色
+                          : "text-gray-400 group-hover:text-gray-600"  // 未选中状态使用灰色，悬浮时加深
+                      )}>
+                        {layout.icon}
+                      </div>
+                    </div>
+                    <div className={cn(
+                      "absolute bottom-0 left-0 right-0 p-2 text-center transition-all duration-200",
+                      "bg-gradient-to-t from-white/90 to-white/0 backdrop-blur-sm",
+                      selectedLayout === layout.id
+                        ? "translate-y-0 text-blue-600"  // 选中状态文字显示蓝色
+                        : "translate-y-full group-hover:translate-y-0 text-gray-600"  // 未选中状态文字显示深灰色
+                    )}>
+                      <p className="text-sm font-medium">
+                        {layout.name}
+                      </p>
+                      <p className={cn(
+                        "text-xs line-clamp-2",
+                        selectedLayout === layout.id
+                          ? "text-blue-500/80"  // 选中状态描述文字显示淡蓝色
+                          : "text-gray-500"     // 未选中状态描述文字显示灰色
+                      )}>
+                        {layout.description}
+                      </p>
+                    </div>
                   </button>
                 ))}
-                {inputHistory.length > 3 && (
-                  <button className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition-colors">
-                    +{inputHistory.length - 3} 更多
-                  </button>
-                )}
               </div>
-            )}
+            </div>
+
+            {/* 输入区域 */}
+            <div className="relative">
+              <form onSubmit={handleFormSubmit} className="relative">
+                <div className="relative rounded-xl border border-gray-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus-within:shadow-md focus-within:border-blue-500">
+                  <textarea
+                    ref={inputRef}
+                    className="w-full p-4 pr-16 rounded-xl bg-transparent resize-none focus:outline-none"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="输入您想要生成的信息卡片内容..."
+                    disabled={isLoading}
+                    rows={3}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (input.trim()) {
+                          handleFormSubmit(e);
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={isLoading || !input.trim()}
+                    className={cn(
+                      "absolute right-3 bottom-3",
+                      "p-2 rounded-lg transition-all duration-200",
+                      "bg-gradient-to-r from-blue-500 to-indigo-600",
+                      "hover:from-blue-600 hover:to-indigo-700",
+                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                      "text-white shadow-sm"
+                    )}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Send className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </form>
+
+              {/* 历史记录 */}
+              {inputHistory.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="text-xs text-gray-500 flex items-center">
+                    <Clock className="h-3 w-3 mr-1" />
+                    历史:
+                  </span>
+                  {inputHistory.slice(0, 3).map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={() => selectHistoryInput(item)}
+                      className={cn(
+                        "px-3 py-1.5 text-xs rounded-full transition-colors",
+                        "bg-gray-100 hover:bg-gray-200 text-gray-700",
+                        "flex items-center gap-1 max-w-[200px]"
+                      )}
+                    >
+                      <span className="truncate">{item}</span>
+                    </button>
+                  ))}
+                  {inputHistory.length > 3 && (
+                    <button className="px-3 py-1.5 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700">
+                      +{inputHistory.length - 3}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
