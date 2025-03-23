@@ -7,6 +7,7 @@ import { Sparkles, Loader2, Send, Clock, Eye, ExternalLink, LayoutGrid, AlignLef
 import Link from "next/link";
 import { useSessionStorage } from "@/lib/hooks/useSessionStorage";
 import { cn } from "@/lib/utils";
+import { LayoutSelector } from "@/components/LayoutSelector";
 
 export default function Home() {
   const [error, setError] = useState<string>("");
@@ -50,12 +51,12 @@ export default function Home() {
       id: "carousel",
       name: "轮播布局",
       icon: (
-        <div className="w-full aspect-video border-2 border-current p-1 flex gap-1">
+        <div className="w-full aspect-video border border-current p-0.5 flex gap-0.5">
           <div className="flex-1 h-full bg-current"></div>
-          <div className="w-1 h-full flex flex-col justify-center gap-1">
-            <div className="w-1 h-1 rounded-full bg-current"></div>
-            <div className="w-1 h-1 rounded-full bg-current opacity-50"></div>
-            <div className="w-1 h-1 rounded-full bg-current opacity-50"></div>
+          <div className="w-0.5 h-full flex flex-col justify-center gap-0.5">
+            <div className="w-0.5 h-0.5 rounded-full bg-current"></div>
+            <div className="w-0.5 h-0.5 rounded-full bg-current opacity-50"></div>
+            <div className="w-0.5 h-0.5 rounded-full bg-current opacity-50"></div>
           </div>
         </div>
       ),
@@ -65,10 +66,10 @@ export default function Home() {
       id: "quote",
       name: "引用布局",
       icon: (
-        <div className="w-full aspect-square border-2 border-current p-1">
-          <div className="text-2xl font-serif mb-1">"</div>
-          <div className="w-full h-2 bg-current mb-1"></div>
-          <div className="w-2/3 h-2 bg-current"></div>
+        <div className="w-full aspect-square border border-current p-0.5">
+          <div className="text-lg font-serif mb-0.5">"</div>
+          <div className="w-full h-1 bg-current mb-0.5"></div>
+          <div className="w-2/3 h-1 bg-current"></div>
         </div>
       ),
       description: "适合展示名言警句或重要引用",
@@ -445,53 +446,11 @@ export default function Home() {
         <div className="border-t border-gray-200 bg-white/90 backdrop-blur-sm p-6">
           <div className="max-w-3xl mx-auto space-y-6">
             {/* 布局选择器 */}
-            <div className="flex flex-col items-center space-y-4">
-              <h3 className="text-lg font-medium text-gray-900">选择展示方式</h3>
-              <div className="flex gap-4 w-full max-w-md">
-                {layoutTypes.map((layout) => (
-                  <button
-                    key={layout.id}
-                    onClick={() => setSelectedLayout(layout.id)}
-                    className={cn(
-                      "flex-1 group relative overflow-hidden rounded-xl border-2 transition-all duration-200 aspect-[4/3]",
-                      selectedLayout === layout.id
-                        ? "border-blue-500 text-blue-500 bg-blue-50"
-                        : "border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                    )}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className={cn(
-                        "w-16 h-16 transition-colors duration-200",
-                        selectedLayout === layout.id
-                          ? "text-blue-500"  // 选中状态使用蓝色
-                          : "text-gray-400 group-hover:text-gray-600"  // 未选中状态使用灰色，悬浮时加深
-                      )}>
-                        {layout.icon}
-                      </div>
-                    </div>
-                    <div className={cn(
-                      "absolute bottom-0 left-0 right-0 p-2 text-center transition-all duration-200",
-                      "bg-gradient-to-t from-white/90 to-white/0 backdrop-blur-sm",
-                      selectedLayout === layout.id
-                        ? "translate-y-0 text-blue-600"  // 选中状态文字显示蓝色
-                        : "translate-y-full group-hover:translate-y-0 text-gray-600"  // 未选中状态文字显示深灰色
-                    )}>
-                      <p className="text-sm font-medium">
-                        {layout.name}
-                      </p>
-                      <p className={cn(
-                        "text-xs line-clamp-2",
-                        selectedLayout === layout.id
-                          ? "text-blue-500/80"  // 选中状态描述文字显示淡蓝色
-                          : "text-gray-500"     // 未选中状态描述文字显示灰色
-                      )}>
-                        {layout.description}
-                      </p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <LayoutSelector
+              layouts={layoutTypes}
+              selectedLayout={selectedLayout}
+              onLayoutSelect={setSelectedLayout}
+            />
 
             {/* 输入区域 */}
             <div className="relative">
