@@ -305,39 +305,6 @@ export default function Home() {
 
           {hasAnyCardData && (
             <div className="max-w-6xl mx-auto">
-              <div className="bg-blue-50 rounded-lg p-3 mb-4 border border-blue-100">
-                <div className="flex items-start">
-                  <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 mr-2">
-                    U
-                  </div>
-                  <div className="flex-grow">
-                    <p className="text-gray-800">{inputHistory[0] || input}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-sm p-3 border border-gray-100 mb-4">
-                <div className="flex items-start mb-2">
-                  <div className="w-7 h-7 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 mr-2">
-                    AI
-                  </div>
-                  <div className="flex-grow">
-                    {Object.values(cardDataMap).find(data => data !== null) && (
-                      <>
-                        <h3 className="text-lg font-bold text-gray-800 mb-1">
-                          {Object.values(cardDataMap).find(data => data !== null)?.title}
-                        </h3>
-                        {Object.values(cardDataMap).find(data => data !== null)?.subtitle && (
-                          <p className="text-gray-600 text-sm">
-                            {Object.values(cardDataMap).find(data => data !== null)?.subtitle}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
               <div className="mb-4 flex justify-between items-center">
                 <div className="text-sm text-gray-500">
                   {hasAnyCardData ? "已生成卡片，显示不同样式效果" : "尚未生成卡片"}
